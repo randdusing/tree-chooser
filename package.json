@@ -1,6 +1,6 @@
 {
   "name": "tree-chooser",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Tree Chooser for Angular",
   "main": "main.js",
   "dependencies": {

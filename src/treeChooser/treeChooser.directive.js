@@ -124,7 +124,6 @@ function TreeChooser($timeout) {
         });
       };
       scope.getListOffset = function () {
-        console.log(input[0].parentNode.offsetHeight);
         return input[0].parentNode.offsetHeight + 'px';
       };
       scope.scrollActive = function () {

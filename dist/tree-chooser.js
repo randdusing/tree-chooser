@@ -209,7 +209,6 @@
 	        });
 	      };
 	      scope.getListOffset = function () {
-	        console.log(input[0].parentNode.offsetHeight);
 	        return input[0].parentNode.offsetHeight + 'px';
 	      };
 	      scope.scrollActive = function () {
@@ -259,7 +258,7 @@
 
 
 	// module
-	exports.push([module.id, ".treeChooser {\n  position: relative;\n}\n.treeChooser-input {\n  border: 1px solid #000;\n  padding: 5px;\n}\n.treeChooser-input-focused {\n  outline:\n}\n.treeChooser-input span {\n  border: 1px solid #000;\n  border-radius: 5px;\n  display: inline-block;\n  margin: 0 5px 5px 0;\n  padding: 2px;\n}\n.treeChooser-input input {\n  border: none;\n  outline: none;\n}\n.treeChooser ul {\n  padding-left: 10px;\n  list-style: none;\n}\n.treeChooser > ul {\n  background: #fff;\n  border: 1px solid #666;\n  padding: 5px;\n  position: absolute;\n  left: 0;\n  width: 300px;\n  max-height: 200px;\n  overflow: auto;\n}\n.treeChooser-selected  > .treeChooser-label {\n  color: #0a9dc7;\n  font-weight: bold;\n}\n.treeChooser-active  > .treeChooser-label {\n  font-style: italic;\n  font-weight: bold;\n}\n.treeChooser-disabled {\n  color: #9e9e9e;\n}\n.treeChooser-expansion {\n  display: inline-block;\n  width: 10px;\n}\n.treeChooser-expanded {\n  content: '-';\n}\n.treeChooser-collapsed {\n  content: '+';\n}\n", ""]);
+	exports.push([module.id, ".treeChooser {\n  position: relative;\n}\n.treeChooser-input {\n  border: 1px solid #000;\n  padding: 5px;\n}\n.treeChooser-input span {\n  border: 1px solid #000;\n  border-radius: 5px;\n  display: inline-block;\n  margin: 0 5px 5px 0;\n  padding: 2px;\n}\n.treeChooser-input input {\n  border: none;\n  outline: none;\n}\n.treeChooser ul {\n  padding-left: 10px;\n  list-style: none;\n}\n.treeChooser > ul {\n  background: #fff;\n  border: 1px solid #666;\n  padding: 5px;\n  position: absolute;\n  left: 0;\n  width: 300px;\n  max-height: 200px;\n  overflow: auto;\n}\n.treeChooser-selected  > .treeChooser-label {\n  color: #0a9dc7;\n  font-weight: bold;\n}\n.treeChooser-active  > .treeChooser-label {\n  font-style: italic;\n  font-weight: bold;\n}\n.treeChooser-disabled {\n  color: #9e9e9e;\n}\n.treeChooser-expansion {\n  display: inline-block;\n  width: 10px;\n}\n.treeChooser-expanded {\n  content: '-';\n}\n.treeChooser-collapsed {\n  content: '+';\n}\n", ""]);
 
 	// exports
 
