@@ -1,0 +1,24 @@
+<span class="treeChooser-item"
+      ng-class="{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}">
+  <!-- Expansion -->
+  <span class="treeChooser-expansion"
+        ng-click="vm.item.setActive(true); vm.item.toggleExpanded()">
+    <span ng-show="vm.item.hasAChildPresent() && vm.item.isExpanded()"
+          class="treeChooser-expanded">-</span>
+    <span ng-show="vm.item.hasAChildPresent() && !vm.item.isExpanded()"
+          class="treeChooser-collapsed">+</span>
+  </span>
+
+  <!-- Label @todo turn into template -->
+  <span class="treeChooser-label"
+        ng-class="{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}"
+        ng-click="vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)">
+    {{vm.item.getLabel()}}
+  </span>
+
+  <!-- Recursion -->
+  <ul ng-if="vm.item.isExpanded()">
+    <li ng-repeat="item in vm.item.getPresentChildren()"
+        tree-chooser-item="item"></li>
+  </ul>
+</span>

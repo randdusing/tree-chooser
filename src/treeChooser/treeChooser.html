@@ -1,0 +1,25 @@
+<div class="treeChooser">
+  <div class="treeChooser-input">
+    <span ng-if="vm.enablePills"
+          ng-repeat="item in vm.ngModel.$modelValue">
+      {{item.label}}
+    </span>
+    <input type="text"
+           ng-disabled="vm.ngDisabled"
+           ng-model="vm.filterText"
+           ng-keydown="vm.onTextKeyDown($event)"
+           placeholder="{{vm.ngPlaceholder}}"
+           ng-click="vm.show()">
+  </div>
+
+  <ul ng-show="vm.shown"
+      ng-keydown="vm.onListKeyDown($event)"
+      ng-focus="vm.next()"
+      ng-style="{'top': getListOffset()}"
+      class="treeChooser-list"
+      tabindex="-1">
+    <li ng-repeat="item in vm.getPresentItems()"
+        tree-chooser-item="item"></li>
+    <li ng-if="!vm.getPresentItems().length">No match</li>
+  </ul>
+</div>
