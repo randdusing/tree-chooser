@@ -1,8 +1,15 @@
+var webpack = require('webpack');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
+
 module.exports = {
-  entry: "./main.js",
+  devtool: 'source-map',
+  entry: {
+    'tree-chooser': './src/index.js',
+    'tree-chooser.min': './src/index.js'
+  },
   output: {
-    path: __dirname + "/dist",
-    filename: "tree-chooser.js"
+    path: './dist',
+    filename: '[name].js'
   },
   externals: {
     angular: 'angular',
@@ -23,14 +30,21 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        loader: "style-loader!css-loader"
+        loader: ExtractTextPlugin.extract('style-loader', 'css-loader')
       },
       {
         test: /\.html$/,
-        loader: 'html'
+        loader: 'html?minimize=true'
       }
     ]
   },
+  plugins: [
+    new ExtractTextPlugin('tree-chooser.css'),
+    new webpack.optimize.UglifyJsPlugin({
+      include: /\.min\.js$/,
+      minimize: true
+    })
+  ],
   jshint: {
     failOnHint: true,
     esversion: 6,
