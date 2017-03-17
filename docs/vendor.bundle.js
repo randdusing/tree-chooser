@@ -41632,7 +41632,290 @@
 	!window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
 
 /***/ },
-/* 301 */
+/* 301 */,
+/* 302 */,
+/* 303 */
+/***/ function(module, exports) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	// css base code, injected by the css-loader
+	module.exports = function() {
+		var list = [];
+	
+		// return the list of modules as css string
+		list.toString = function toString() {
+			var result = [];
+			for(var i = 0; i < this.length; i++) {
+				var item = this[i];
+				if(item[2]) {
+					result.push("@media " + item[2] + "{" + item[1] + "}");
+				} else {
+					result.push(item[1]);
+				}
+			}
+			return result.join("");
+		};
+	
+		// import a list of modules into the list
+		list.i = function(modules, mediaQuery) {
+			if(typeof modules === "string")
+				modules = [[null, modules, ""]];
+			var alreadyImportedModules = {};
+			for(var i = 0; i < this.length; i++) {
+				var id = this[i][0];
+				if(typeof id === "number")
+					alreadyImportedModules[id] = true;
+			}
+			for(i = 0; i < modules.length; i++) {
+				var item = modules[i];
+				// skip already imported module
+				// this implementation is not 100% perfect for weird media query combinations
+				//  when a module is imported multiple times with different media queries.
+				//  I hope this will never occur (Hey this way we have smaller bundles)
+				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+					if(mediaQuery && !item[2]) {
+						item[2] = mediaQuery;
+					} else if(mediaQuery) {
+						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+					}
+					list.push(item);
+				}
+			}
+		};
+		return list;
+	};
+
+
+/***/ },
+/* 304 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	var stylesInDom = {},
+		memoize = function(fn) {
+			var memo;
+			return function () {
+				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+				return memo;
+			};
+		},
+		isOldIE = memoize(function() {
+			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
+		}),
+		getHeadElement = memoize(function () {
+			return document.head || document.getElementsByTagName("head")[0];
+		}),
+		singletonElement = null,
+		singletonCounter = 0;
+	
+	module.exports = function(list, options) {
+		if(false) {
+			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+		}
+	
+		options = options || {};
+		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+		// tags it will allow on a page
+		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
+	
+		var styles = listToStyles(list);
+		addStylesToDom(styles, options);
+	
+		return function update(newList) {
+			var mayRemove = [];
+			for(var i = 0; i < styles.length; i++) {
+				var item = styles[i];
+				var domStyle = stylesInDom[item.id];
+				domStyle.refs--;
+				mayRemove.push(domStyle);
+			}
+			if(newList) {
+				var newStyles = listToStyles(newList);
+				addStylesToDom(newStyles, options);
+			}
+			for(var i = 0; i < mayRemove.length; i++) {
+				var domStyle = mayRemove[i];
+				if(domStyle.refs === 0) {
+					for(var j = 0; j < domStyle.parts.length; j++)
+						domStyle.parts[j]();
+					delete stylesInDom[domStyle.id];
+				}
+			}
+		};
+	}
+	
+	function addStylesToDom(styles, options) {
+		for(var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+			if(domStyle) {
+				domStyle.refs++;
+				for(var j = 0; j < domStyle.parts.length; j++) {
+					domStyle.parts[j](item.parts[j]);
+				}
+				for(; j < item.parts.length; j++) {
+					domStyle.parts.push(addStyle(item.parts[j], options));
+				}
+			} else {
+				var parts = [];
+				for(var j = 0; j < item.parts.length; j++) {
+					parts.push(addStyle(item.parts[j], options));
+				}
+				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+			}
+		}
+	}
+	
+	function listToStyles(list) {
+		var styles = [];
+		var newStyles = {};
+		for(var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var id = item[0];
+			var css = item[1];
+			var media = item[2];
+			var sourceMap = item[3];
+			var part = {css: css, media: media, sourceMap: sourceMap};
+			if(!newStyles[id])
+				styles.push(newStyles[id] = {id: id, parts: [part]});
+			else
+				newStyles[id].parts.push(part);
+		}
+		return styles;
+	}
+	
+	function createStyleElement() {
+		var styleElement = document.createElement("style");
+		var head = getHeadElement();
+		styleElement.type = "text/css";
+		head.appendChild(styleElement);
+		return styleElement;
+	}
+	
+	function createLinkElement() {
+		var linkElement = document.createElement("link");
+		var head = getHeadElement();
+		linkElement.rel = "stylesheet";
+		head.appendChild(linkElement);
+		return linkElement;
+	}
+	
+	function addStyle(obj, options) {
+		var styleElement, update, remove;
+	
+		if (options.singleton) {
+			var styleIndex = singletonCounter++;
+			styleElement = singletonElement || (singletonElement = createStyleElement());
+			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
+			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
+		} else if(obj.sourceMap &&
+			typeof URL === "function" &&
+			typeof URL.createObjectURL === "function" &&
+			typeof URL.revokeObjectURL === "function" &&
+			typeof Blob === "function" &&
+			typeof btoa === "function") {
+			styleElement = createLinkElement();
+			update = updateLink.bind(null, styleElement);
+			remove = function() {
+				styleElement.parentNode.removeChild(styleElement);
+				if(styleElement.href)
+					URL.revokeObjectURL(styleElement.href);
+			};
+		} else {
+			styleElement = createStyleElement();
+			update = applyToTag.bind(null, styleElement);
+			remove = function() {
+				styleElement.parentNode.removeChild(styleElement);
+			};
+		}
+	
+		update(obj);
+	
+		return function updateStyle(newObj) {
+			if(newObj) {
+				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
+					return;
+				update(obj = newObj);
+			} else {
+				remove();
+			}
+		};
+	}
+	
+	var replaceText = (function () {
+		var textStore = [];
+	
+		return function (index, replacement) {
+			textStore[index] = replacement;
+			return textStore.filter(Boolean).join('\n');
+		};
+	})();
+	
+	function applyToSingletonTag(styleElement, index, remove, obj) {
+		var css = remove ? "" : obj.css;
+	
+		if (styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = replaceText(index, css);
+		} else {
+			var cssNode = document.createTextNode(css);
+			var childNodes = styleElement.childNodes;
+			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
+			if (childNodes.length) {
+				styleElement.insertBefore(cssNode, childNodes[index]);
+			} else {
+				styleElement.appendChild(cssNode);
+			}
+		}
+	}
+	
+	function applyToTag(styleElement, obj) {
+		var css = obj.css;
+		var media = obj.media;
+		var sourceMap = obj.sourceMap;
+	
+		if(media) {
+			styleElement.setAttribute("media", media)
+		}
+	
+		if(styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = css;
+		} else {
+			while(styleElement.firstChild) {
+				styleElement.removeChild(styleElement.firstChild);
+			}
+			styleElement.appendChild(document.createTextNode(css));
+		}
+	}
+	
+	function updateLink(linkElement, obj) {
+		var css = obj.css;
+		var media = obj.media;
+		var sourceMap = obj.sourceMap;
+	
+		if(sourceMap) {
+			// http://stackoverflow.com/a/26603875
+			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+		}
+	
+		var blob = new Blob([css], { type: "text/css" });
+	
+		var oldSrc = linkElement.href;
+	
+		linkElement.href = URL.createObjectURL(blob);
+	
+		if(oldSrc)
+			URL.revokeObjectURL(oldSrc);
+	}
+
+
+/***/ },
+/* 305 */
 /***/ function(module, exports) {
 
 	/******/(function(modules){// webpackBootstrap
@@ -41693,10 +41976,13 @@
 		       */selectsChildren:'=?',/**
 		       * Enable pills
 		       * @type {boolean}
-		       */enablePills:'=?'},template:__webpack_require__(8),link:function link(scope,element){// @todo clean up query selectors to not rely on classes
+		       */enablePills:'=?',/**
+		       * Just use the ID as the model value?
+		       * @type {boolean}
+		       */modelAsId:'=?'},template:__webpack_require__(8),link:function link(scope,element){// @todo clean up query selectors to not rely on classes
 	var input=angular.element(element[0].querySelector('.treeChooser-input input'));input.on('click',function(event){event.stopPropagation();});var list=angular.element(element[0].querySelector('.treeChooser-list'));list.on('click',function(event){event.stopPropagation();});scope.focusInput=function(){$timeout(function(){input[0].focus();});};scope.focusList=function(){$timeout(function(){list[0].focus();});};scope.getListOffset=function(){return input[0].parentNode.offsetHeight+'px';};scope.scrollActive=function(){$timeout(function(){var active=element[0].querySelector('.treeChooser-active');list[0].scrollTop=active.offsetTop-12;// @todo this should be about font size
 	});};}};}module.exports=TreeChooser;/***/},/* 4 *//***/function(module,exports){// removed by extract-text-webpack-plugin
-	/***/},,,,/* 5 *//* 6 *//* 7 *//* 8 *//***/function(module,exports){module.exports="<div class=treeChooser> <div class=treeChooser-input> <span ng-if=vm.enablePills ng-repeat=\"item in vm.ngModel.$modelValue\"> {{item.label}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=\"{'top': getListOffset()}\" class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";/***/},/* 9 *//***/function(module,exports,__webpack_require__){'use strict';/*@ngInject*/TreeChooserController.$inject=['$element','$scope','$window','TreeChooserItem'];function TreeChooserController($element,$scope,$window,TreeChooserItem){var vm=this,_=__webpack_require__(10);// Flag to determine whether search results are showing
+	/***/},,,,/* 5 *//* 6 *//* 7 *//* 8 *//***/function(module,exports){module.exports="<div class=treeChooser> <div class=treeChooser-input> <span ng-if=vm.enablePills ng-click=vm.removeFromModel(item) ng-repeat=\"item in vm.getModelAsItems()\"> {{item.label}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=\"{'top': getListOffset()}\" class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";/***/},/* 9 *//***/function(module,exports,__webpack_require__){'use strict';/*@ngInject*/TreeChooserController.$inject=['$element','$scope','$window','TreeChooserItem'];function TreeChooserController($element,$scope,$window,TreeChooserItem){var vm=this,_=__webpack_require__(10);// Flag to determine whether search results are showing
 	vm.shown=false;// Get access to ngModel
 	vm.ngModel=$element.controller('ngModel');// And override $isEmpty to account for array emptiness
 	vm.ngModel.$isEmpty=_.isEmpty;// Properties use to access special parts of item
@@ -41705,7 +41991,10 @@
 	if(_.isUndefined(vm.onlyLeaves)){vm.onlyLeaves=false;}// Disable selects children by default
 	if(_.isUndefined(vm.selectsChildren)){vm.selectsChildren=false;}// Disable deselects children by default
 	if(_.isUndefined(vm.deselectsChildren)){vm.deselectsChildren=false;}// Disable restrict model by default
-	if(_.isUndefined(vm.restrictModel)){vm.restrictModel=false;}// Default filter node function
+	if(_.isUndefined(vm.restrictModel)){vm.restrictModel=false;}// Enable pills by default
+	if(_.isUndefined(vm.enablePills)){vm.enablePills=true;}// Save ID to model by default
+	if(_.isUndefined(vm.modelAsId)){vm.modelAsId=true;}// Auto show after specified filter text length
+	if(!_.isNumber(vm.filterAutoShowLength)){vm.filterAutoShowLength=2;}// Default filter node function
 	if(!_.isFunction(vm.filterNode)){vm.filterNode=function(item,filterText){return _.includes(_.toLower(_.get(item,properties.label)),_.toLower(filterText));};}// Default disable node function
 	if(!_.isFunction(vm.disableNode)){vm.disableNode=_.stubFalse;}// @todo create a separate directive for the list
 	/**
@@ -41718,10 +42007,22 @@
 		   */vm.closeFromClick=function(){vm.close();$scope.$apply();};/**
 		   * Handle results keyboard navigation
 		   * @param {Object} $event
-		   */vm.onListKeyDown=function($event){var shouldStop=false;switch($event.code){case'Escape':shouldStop=true;vm.close(true);$scope.focusInput();break;case'Enter':shouldStop=true;vm.toggleSelectedActive();vm.close(true);$scope.focusInput();break;case'ArrowDown':shouldStop=true;vm.next();break;case'ArrowUp':shouldStop=true;vm.prev();break;case'ArrowLeft':shouldStop=true;vm.collapseActive();break;case'ArrowRight':shouldStop=true;vm.expandActive();break;case'Space':shouldStop=true;vm.toggleSelectedActive();break;case'Tab':vm.close(true);break;}if(shouldStop){$event.preventDefault();$event.stopPropagation();}};/**
+		   */vm.onListKeyDown=function($event){var shouldStop=false;switch($event.keyCode){case 27://Escape
+	shouldStop=true;vm.close(true);$scope.focusInput();break;case 13://Enter
+	shouldStop=true;vm.toggleSelectedActive();vm.close(true);$scope.focusInput();break;case 40://Down Arrow
+	shouldStop=true;vm.next();break;case 38://Up Arrow
+	shouldStop=true;vm.prev();break;case 37://Left Arrow
+	shouldStop=true;vm.collapseActive();break;case 39://Right Arrow
+	shouldStop=true;vm.expandActive();break;case 32://Space
+	shouldStop=true;vm.toggleSelectedActive();break;case 9://Tab
+	vm.close(true);break;}if(shouldStop){$event.preventDefault();$event.stopPropagation();}};/**
 		   * Handle input keyboard navigation
 		   * @param {Object} $event
-		   */vm.onTextKeyDown=function($event){switch($event.code){case'Escape':vm.close(true);break;case'Enter':vm.show($event);break;case'ArrowDown':vm.show($event);$scope.focusList();break;}};/**
+		   */vm.onTextKeyDown=function($event){switch($event.keyCode){case 27://Escape
+	vm.close(true);break;case 13://Enter
+	vm.show($event);break;case 40://Down Arrow
+	vm.show($event);$scope.focusList();break;case 8://Backspace
+	if(!_.isEmpty(vm.ngModel.$viewValue)){vm.ngModel.$viewValue.pop();}break;}};/**
 		   * Find next visible item
 		   */vm.next=function(){var active=vm.findActive();if(!active){var first=_.find(vm.itemsFlat,function(item){return item.isShowing();});first.setActive(true);}else{var start=_.findIndex(vm.itemsFlat,function(item){return item.isActive();});active.setActive(false);// @todo optimize array traversal
 	var next=_.find(vm.itemsFlat,function(item,index){return index>start&&item.isShowing();});if(!next){next=_.find(vm.itemsFlat,function(item,index){return index<start&&item.isShowing();});}if(next){next.setActive(true);}}$scope.scrollActive();};/**
@@ -41732,6 +42033,8 @@
 		   */vm.expandActive=function(){var active=vm.findActive();if(active){active.setExpanded(true);}};/**
 		   * Collapse active item
 		   */vm.collapseActive=function(){var active=vm.findActive();if(active){active.setExpanded(false);}};/**
+		   * Set all items inactive
+		   */vm.clearActive=function(){_.forEach(vm.itemsFlat,function(item){item.setActive(false);});};/**
 		   * Toggle selection on active item
 		   */vm.toggleSelectedActive=function(){var active=vm.findActive();if(active){vm.toggleSelected(active);}};/**
 		   * Get the active item
@@ -41760,16 +42063,17 @@
 		   * Clear all no leaves
 		   * @todo if deselect Children is enabled, won't this deselect leaves?
 		   */vm.clearBranches=function(){_.forEach(vm.itemsFlat,function(item){if(!item.isLeaf()&&item.isSelected()){vm.setSelected(item,false);}});};/**
+		   * Get model as items because it could be ssaved as id
+		   */vm.getModelAsItems=function(){if(vm.modelAsId){return _.map(vm.ngModel.$viewValue,function(id){return vm.itemsIndex[id].getItem();});}else{return vm.ngModel.$viewValue;}};/**
 		   * Add item to model and trigger validation
-		   * @todo is cloning necessary?
-		   */vm.addToModel=function(item){var clone=_.cloneDeep(item.getItem());vm.ngModel.$viewValue.push(clone);vm.ngModel.$validate();};/**
+		   */vm.addToModel=function(item){vm.ngModel.$viewValue.push(vm.modelAsId?item.getId():item.getItem());vm.ngModel.$validate();};/**
 		   * Remove item from model and trigger validation
-		   */vm.removeFromModel=function(item){var id=_.get(item,properties.id);_.remove(vm.ngModel.$viewValue,function(item){return _.get(item,properties.id)===id;});vm.ngModel.$validate();};/**
+		   */vm.removeFromModel=function(item){var id=_.get(item,properties.id);_.remove(vm.ngModel.$viewValue,function(item){return vm.modelAsId?item===id:_.get(item,properties.id)===id;});vm.ngModel.$validate();};/**
 		   * Remove all items from model
 		   */vm.clearModel=function(){_.remove(vm.ngModel.$viewValue,_.returnTrue);vm.ngModel.$validate();};/**
 		   * Sync model to items in case model, items or restrictModel changes
-		   */vm.syncModelToItems=_.debounce(function(){_.forEach(vm.itemsFlat,function(item){item.setSelected(false);});var index=_.keyBy(vm.itemsFlat,function(item){return item.getId();});var toDelete=[];// Set selected items back to true
-	_.forEach(vm.ngModel.$modelValue,function(item){var checkItem=index[_.get(item,properties.id)];if(checkItem){checkItem.setSelected(true);}else if(vm.restrictModel){toDelete.push(item);}});_.forEach(toDelete,function(item){vm.removeFromModel(item);});// This is debounced, so ensure scope is applied!
+		   */vm.syncModelToItems=_.debounce(function(){_.forEach(vm.itemsFlat,function(item){item.setSelected(false);});var toDelete=[];// Set selected items back to true
+	_.forEach(vm.ngModel.$modelValue,function(item){var id=vm.modelAsId?item:_.get(item,properties.id);var checkItem=vm.itemsIndex[id];if(checkItem){checkItem.setSelected(true);}else if(vm.restrictModel){toDelete.push(item);}});_.forEach(toDelete,function(item){vm.removeFromModel(item);});// This is debounced, so ensure scope is applied!
 	$scope.$apply();});/**
 		   * Create TreeChooserItem hierarchy
 		   */vm.createItems=function(items){return _.map(items,function(item){return new TreeChooserItem(item,null,properties);});};/**
@@ -41780,11 +42084,11 @@
 		   * Sync on model change
 		   */$scope.$watchCollection('vm.ngModel.$modelValue',function(){vm.syncModelToItems();});/**
 		   * Sync on items change
-		   */$scope.$watch(function(){// @todo whats more expensive, flatten list and doing watchCollection or this?
-	return JSON.stringify(vm.treeData);},function(){// @todo is this manual GC needed?
+		   */$scope.$watch('vm.treeData',function(){// @todo is this manual GC needed?
 	_.forEach(vm.itemsFlat,function(item,index){delete vm.itemsFlat[index];});// Create chooser items, so the underlying model is not touched
 	vm.items=vm.createItems(vm.treeData);// Flatten into a sorted list for easier navigation
-	vm.itemsFlat=vm.flattenItems(vm.items);vm.syncModelToItems();});/**
+	vm.itemsFlat=vm.flattenItems(vm.items);// Item index
+	vm.itemsIndex=_.keyBy(vm.itemsFlat,function(item){return item.getId();});vm.syncModelToItems();},true);/**
 		   * Sync on restrict model
 		   */$scope.$watch('vm.restrictModel',function(value){if(value){vm.syncModelToItems();}});/**
 		   * Clear on multiselect false
@@ -51237,20 +51541,20 @@
 	(freeModule.exports=_)._=_;// Export for CommonJS support.
 	freeExports._=_;}else{// Export to the global object.
 	root._=_;}}).call(this);/* WEBPACK VAR INJECTION */}).call(exports,function(){return this;}(),__webpack_require__(11)(module));/***/},/* 11 *//***/function(module,exports){module.exports=function(module){if(!module.webpackPolyfill){module.deprecate=function(){};module.paths=[];// module.parent = undefined by default
-	module.children=[];module.webpackPolyfill=1;}return module;};/***/},/* 12 *//***/function(module,exports,__webpack_require__){'use strict';module.exports=function(treeChooser){treeChooser.directive('treeChooserItem',__webpack_require__(13)).controller('treeChooserItemController',__webpack_require__(15)).factory('TreeChooserItem',__webpack_require__(16));};/***/},/* 13 *//***/function(module,exports,__webpack_require__){'use strict';function TreeChooserItem(){return{bindToController:true,controller:'treeChooserItemController',controllerAs:'vm',require:'^treeChooser',scope:{item:'=treeChooserItem'},template:__webpack_require__(14)};}module.exports=TreeChooserItem;/***/},/* 14 *//***/function(module,exports){module.exports="<span class=treeChooser-item ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";/***/},/* 15 *//***/function(module,exports){'use strict';/*@ngInject*/TreeChooserItemController.$inject=['$element'];function TreeChooserItemController($element){var vm=this;vm.chooserVm=$element.controller('treeChooser');}module.exports=TreeChooserItemController;/***/},/* 16 *//***/function(module,exports,__webpack_require__){'use strict';function TreeChooserItemFactory(){var _=__webpack_require__(10);function TreeChooserItem(item,parent,properties){var _this=this;this.item=item;// @todo use this for templates
+	module.children=[];module.webpackPolyfill=1;}return module;};/***/},/* 12 *//***/function(module,exports,__webpack_require__){'use strict';module.exports=function(treeChooser){treeChooser.directive('treeChooserItem',__webpack_require__(13)).controller('treeChooserItemController',__webpack_require__(15)).factory('TreeChooserItem',__webpack_require__(16));};/***/},/* 13 *//***/function(module,exports,__webpack_require__){'use strict';function TreeChooserItem(){return{bindToController:true,controller:'treeChooserItemController',controllerAs:'vm',require:'^treeChooser',scope:{item:'=treeChooserItem'},template:__webpack_require__(14)};}module.exports=TreeChooserItem;/***/},/* 14 *//***/function(module,exports){module.exports="<span class=treeChooser-item ng-mouseover=\"vm.chooserVm.clearActive(); vm.item.setActive(true)\" ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";/***/},/* 15 *//***/function(module,exports){'use strict';/*@ngInject*/TreeChooserItemController.$inject=['$element'];function TreeChooserItemController($element){var vm=this;vm.chooserVm=$element.controller('treeChooser');}module.exports=TreeChooserItemController;/***/},/* 16 *//***/function(module,exports,__webpack_require__){'use strict';function TreeChooserItemFactory(){var _=__webpack_require__(10);function TreeChooserItem(item,parent,properties){var _this=this;this.item=item;// @todo use this for templates
 	this.properties=properties;this.id=_.get(this.item,this.properties.id);this.label=_.get(this.item,this.properties.label);this.parent=parent;this.active=false;this.excluded=false;this.expanded=false;this.selected=false;var children=_.get(item,properties.children);this.children=_.map(children,function(child){return new TreeChooserItem(child,_this,properties);});}TreeChooserItem.prototype.getItem=function(){return this.item;};TreeChooserItem.prototype.getChildren=function(){return this.children;};TreeChooserItem.prototype.hasAChildPresent=function(){return!!_.find(this.getChildren(),function(child){return child.isPresent();});};TreeChooserItem.prototype.getPresentChildren=function(){return _.filter(this.getChildren(),function(child){return child.isPresent();});};TreeChooserItem.prototype.getId=function(){return this.id;};TreeChooserItem.prototype.getLabel=function(){return this.label;};TreeChooserItem.prototype.isActive=function(){return this.active;};TreeChooserItem.prototype.isLeaf=function(){return _.isEmpty(this.children);};TreeChooserItem.prototype.isShowing=function(){return this.isPresent()&&(!this.parent||this.parent.isExpanded());};TreeChooserItem.prototype.isPresent=function(){return!this.excluded;};TreeChooserItem.prototype.isExpanded=function(){return this.expanded;};TreeChooserItem.prototype.isSelected=function(){return this.selected;};TreeChooserItem.prototype.setActive=function(value){this.active=value;};TreeChooserItem.prototype.setExcluded=function(value){this.excluded=value;};TreeChooserItem.prototype.setExpanded=function(value){this.expanded=value;};TreeChooserItem.prototype.setSelected=function(value){this.selected=value;};TreeChooserItem.prototype.toggleExpanded=function(){this.expanded=!this.expanded;};return TreeChooserItem;}module.exports=TreeChooserItemFactory;/***/}/******/]);//# sourceMappingURL=tree-chooser.js.map
 
 /***/ },
-/* 302 */
+/* 306 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(303);
+	var content = __webpack_require__(307);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(305)(content, {});
+	var update = __webpack_require__(304)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -51267,302 +51571,21 @@
 	}
 
 /***/ },
-/* 303 */
+/* 307 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(304)();
+	exports = module.exports = __webpack_require__(303)();
 	// imports
 	
 	
 	// module
-	exports.push([module.id, ".treeChooser{position:relative}.treeChooser-input{border:1px solid #000;padding:5px}.treeChooser-input span{border:1px solid #000;border-radius:5px;display:inline-block;margin:0 5px 5px 0;padding:2px}.treeChooser-input input{border:none;outline:none}.treeChooser ul{padding-left:10px;list-style:none}.treeChooser>ul{background:#fff;border:1px solid #666;padding:5px;position:absolute;left:0;width:300px;max-height:200px;overflow:auto}.treeChooser-selected>.treeChooser-label{color:#0a9dc7;font-weight:700}.treeChooser-active>.treeChooser-label{font-style:italic;font-weight:700}.treeChooser-disabled{color:#9e9e9e}.treeChooser-expansion{display:inline-block;width:10px}.treeChooser-expanded{content:\"-\"}.treeChooser-collapsed{content:\"+\"}\n/*# sourceMappingURL=tree-chooser.css.map*/", ""]);
+	exports.push([module.id, ".treeChooser{position:relative}.treeChooser-input{border:1px solid #000}.treeChooser-input span{border:1px solid #000;border-radius:5px;display:inline-block;margin:5px 0 0 5px;padding:2px 4px}.treeChooser-input span:hover{background-color:#11c1f3}.treeChooser-input input{margin:5px;border:none;outline:none;width:calc(100% - 10px)}.treeChooser ul{padding-left:10px;list-style:none}.treeChooser>ul{background:#fff;border:1px solid #666;padding:5px;position:absolute;left:0;width:300px;max-height:200px;overflow:auto}.treeChooser-selected>.treeChooser-label{color:#0a9dc7;font-weight:700}.treeChooser-active>.treeChooser-label{font-style:italic;font-weight:700}.treeChooser-disabled{color:#9e9e9e}.treeChooser-expansion{display:inline-block;width:10px}.treeChooser-expanded{content:\"-\"}.treeChooser-collapsed{content:\"+\"}\n/*# sourceMappingURL=tree-chooser.css.map*/", ""]);
 	
 	// exports
 
 
 /***/ },
-/* 304 */
-/***/ function(module, exports) {
-
-	/*
-		MIT License http://www.opensource.org/licenses/mit-license.php
-		Author Tobias Koppers @sokra
-	*/
-	// css base code, injected by the css-loader
-	module.exports = function() {
-		var list = [];
-	
-		// return the list of modules as css string
-		list.toString = function toString() {
-			var result = [];
-			for(var i = 0; i < this.length; i++) {
-				var item = this[i];
-				if(item[2]) {
-					result.push("@media " + item[2] + "{" + item[1] + "}");
-				} else {
-					result.push(item[1]);
-				}
-			}
-			return result.join("");
-		};
-	
-		// import a list of modules into the list
-		list.i = function(modules, mediaQuery) {
-			if(typeof modules === "string")
-				modules = [[null, modules, ""]];
-			var alreadyImportedModules = {};
-			for(var i = 0; i < this.length; i++) {
-				var id = this[i][0];
-				if(typeof id === "number")
-					alreadyImportedModules[id] = true;
-			}
-			for(i = 0; i < modules.length; i++) {
-				var item = modules[i];
-				// skip already imported module
-				// this implementation is not 100% perfect for weird media query combinations
-				//  when a module is imported multiple times with different media queries.
-				//  I hope this will never occur (Hey this way we have smaller bundles)
-				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-					if(mediaQuery && !item[2]) {
-						item[2] = mediaQuery;
-					} else if(mediaQuery) {
-						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-					}
-					list.push(item);
-				}
-			}
-		};
-		return list;
-	};
-
-
-/***/ },
-/* 305 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*
-		MIT License http://www.opensource.org/licenses/mit-license.php
-		Author Tobias Koppers @sokra
-	*/
-	var stylesInDom = {},
-		memoize = function(fn) {
-			var memo;
-			return function () {
-				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
-				return memo;
-			};
-		},
-		isOldIE = memoize(function() {
-			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
-		}),
-		getHeadElement = memoize(function () {
-			return document.head || document.getElementsByTagName("head")[0];
-		}),
-		singletonElement = null,
-		singletonCounter = 0;
-	
-	module.exports = function(list, options) {
-		if(false) {
-			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
-		}
-	
-		options = options || {};
-		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-		// tags it will allow on a page
-		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
-	
-		var styles = listToStyles(list);
-		addStylesToDom(styles, options);
-	
-		return function update(newList) {
-			var mayRemove = [];
-			for(var i = 0; i < styles.length; i++) {
-				var item = styles[i];
-				var domStyle = stylesInDom[item.id];
-				domStyle.refs--;
-				mayRemove.push(domStyle);
-			}
-			if(newList) {
-				var newStyles = listToStyles(newList);
-				addStylesToDom(newStyles, options);
-			}
-			for(var i = 0; i < mayRemove.length; i++) {
-				var domStyle = mayRemove[i];
-				if(domStyle.refs === 0) {
-					for(var j = 0; j < domStyle.parts.length; j++)
-						domStyle.parts[j]();
-					delete stylesInDom[domStyle.id];
-				}
-			}
-		};
-	}
-	
-	function addStylesToDom(styles, options) {
-		for(var i = 0; i < styles.length; i++) {
-			var item = styles[i];
-			var domStyle = stylesInDom[item.id];
-			if(domStyle) {
-				domStyle.refs++;
-				for(var j = 0; j < domStyle.parts.length; j++) {
-					domStyle.parts[j](item.parts[j]);
-				}
-				for(; j < item.parts.length; j++) {
-					domStyle.parts.push(addStyle(item.parts[j], options));
-				}
-			} else {
-				var parts = [];
-				for(var j = 0; j < item.parts.length; j++) {
-					parts.push(addStyle(item.parts[j], options));
-				}
-				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
-			}
-		}
-	}
-	
-	function listToStyles(list) {
-		var styles = [];
-		var newStyles = {};
-		for(var i = 0; i < list.length; i++) {
-			var item = list[i];
-			var id = item[0];
-			var css = item[1];
-			var media = item[2];
-			var sourceMap = item[3];
-			var part = {css: css, media: media, sourceMap: sourceMap};
-			if(!newStyles[id])
-				styles.push(newStyles[id] = {id: id, parts: [part]});
-			else
-				newStyles[id].parts.push(part);
-		}
-		return styles;
-	}
-	
-	function createStyleElement() {
-		var styleElement = document.createElement("style");
-		var head = getHeadElement();
-		styleElement.type = "text/css";
-		head.appendChild(styleElement);
-		return styleElement;
-	}
-	
-	function createLinkElement() {
-		var linkElement = document.createElement("link");
-		var head = getHeadElement();
-		linkElement.rel = "stylesheet";
-		head.appendChild(linkElement);
-		return linkElement;
-	}
-	
-	function addStyle(obj, options) {
-		var styleElement, update, remove;
-	
-		if (options.singleton) {
-			var styleIndex = singletonCounter++;
-			styleElement = singletonElement || (singletonElement = createStyleElement());
-			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
-			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
-		} else if(obj.sourceMap &&
-			typeof URL === "function" &&
-			typeof URL.createObjectURL === "function" &&
-			typeof URL.revokeObjectURL === "function" &&
-			typeof Blob === "function" &&
-			typeof btoa === "function") {
-			styleElement = createLinkElement();
-			update = updateLink.bind(null, styleElement);
-			remove = function() {
-				styleElement.parentNode.removeChild(styleElement);
-				if(styleElement.href)
-					URL.revokeObjectURL(styleElement.href);
-			};
-		} else {
-			styleElement = createStyleElement();
-			update = applyToTag.bind(null, styleElement);
-			remove = function() {
-				styleElement.parentNode.removeChild(styleElement);
-			};
-		}
-	
-		update(obj);
-	
-		return function updateStyle(newObj) {
-			if(newObj) {
-				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
-					return;
-				update(obj = newObj);
-			} else {
-				remove();
-			}
-		};
-	}
-	
-	var replaceText = (function () {
-		var textStore = [];
-	
-		return function (index, replacement) {
-			textStore[index] = replacement;
-			return textStore.filter(Boolean).join('\n');
-		};
-	})();
-	
-	function applyToSingletonTag(styleElement, index, remove, obj) {
-		var css = remove ? "" : obj.css;
-	
-		if (styleElement.styleSheet) {
-			styleElement.styleSheet.cssText = replaceText(index, css);
-		} else {
-			var cssNode = document.createTextNode(css);
-			var childNodes = styleElement.childNodes;
-			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
-			if (childNodes.length) {
-				styleElement.insertBefore(cssNode, childNodes[index]);
-			} else {
-				styleElement.appendChild(cssNode);
-			}
-		}
-	}
-	
-	function applyToTag(styleElement, obj) {
-		var css = obj.css;
-		var media = obj.media;
-		var sourceMap = obj.sourceMap;
-	
-		if(media) {
-			styleElement.setAttribute("media", media)
-		}
-	
-		if(styleElement.styleSheet) {
-			styleElement.styleSheet.cssText = css;
-		} else {
-			while(styleElement.firstChild) {
-				styleElement.removeChild(styleElement.firstChild);
-			}
-			styleElement.appendChild(document.createTextNode(css));
-		}
-	}
-	
-	function updateLink(linkElement, obj) {
-		var css = obj.css;
-		var media = obj.media;
-		var sourceMap = obj.sourceMap;
-	
-		if(sourceMap) {
-			// http://stackoverflow.com/a/26603875
-			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
-		}
-	
-		var blob = new Blob([css], { type: "text/css" });
-	
-		var oldSrc = linkElement.href;
-	
-		linkElement.href = URL.createObjectURL(blob);
-	
-		if(oldSrc)
-			URL.revokeObjectURL(oldSrc);
-	}
-
-
-/***/ },
-/* 306 */
+/* 308 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -68650,10 +68673,10 @@
 	  }
 	}.call(this));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(307)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(309)(module)))
 
 /***/ },
-/* 307 */
+/* 309 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {

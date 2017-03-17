@@ -2,20 +2,89 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Tree Chooser for Angular Example</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>Angular Tree Chooser Example</title>
+
+    <meta name="description" content="Angular Tree Chooser Example">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="description" content="Tree Choose for Angular Example">
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <base href="/tree-chooser/">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
+    <!-- Update this? -->
+    <meta name="google-site-verification" content="oH6gcZZCyEo3MFPG6nJ1ywJnnvI4whecr8ZB64etfrc" />
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
   </head>
-  <body ng-app="app" ng-cloak>
+  <body ng-app="app">
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <ul class="nav navbar-nav">
+          <a href="#" role="button" class="navbar-brand">
+            Tree Chooser
+          </a>
+          <li>
+            <a href="#installation">Installation</a>
+          </li>
+          <li>
+            <a href="#documentation">Documentation</a>
+          </li>
+          <li>
+            <a href="#example">Example</a>
+          </li>
+          <li>
+            <span>
+              <a class="github-button" href="https://github.com/randdusing/tree-chooser" data-count-href="/randdusing/tree-chooser/stargazers" data-count-api="/repos/randdusing/tree-chooser#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star randdusing/tree-chooser on GitHub">Star</a>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </nav>
 
-  <div rd-tree-chooser-example></div>
+    <header>
+      <div class="jumbotron">
+        <div class="container">
+          <h1>Tree Chooser</h1>
+          <p>A Tree Chooser for Angular</p>
+          <small>ng-model, multiselect, customizable, etc</small>
+        </div>
+      </div>
+    </header>
 
-  <script src="vendor.bundle.js?c48ac980151501ca7624"></script><script src="app.bundle.js?c48ac980151501ca7624"></script></body>
+    <div class="container">
+      <section id="installation">
+        <h2>Installation</h2>
+        <p>
+          The only dependency is <a href="https://angularjs.org/">AngularJs</a>. Tested with 1.6.3, but earlier versions should work as well.
+        </p>
+
+        <p>Install with NPM:</p>
+        <div class="well well-sm">
+          npm install tree-chooser --save
+        </div>
+
+        <p>Add the file:</p>
+        <div class="well well-sm">
+          require('tree-chooser');<br/>
+          require('tree-chooser/dist/tree-chooser.css');<br/><br/>
+          <i>//or the old-fashioned way</i><br/><br/>
+          &lt; script src="lib/tree-chooser/dist/tree-chooser.js"&gt;&lt;/script&gt;<br/>
+          &lt; link rel="stylesheet" href="lib/tree-chooser/dist/tree-chooser.css"&gt;
+        </div>
+
+        <p>Use the module:</p>
+        <div class="well well-sm">
+          angular.module('app', ['tree-chooser']);
+        </div>
+      </section>
+
+      <div rd-tree-chooser-example></div>
+    </div>
+
+    <script>
+      window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;
+      ga('create','UA-56949932-4','auto');ga('send','pageview')
+    </script>
+    <script src="https://www.google-analytics.com/analytics.js" async defer></script>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <script src="vendor.bundle.js?2554b05e91fb1b6ac1f3"></script><script src="app.bundle.js?2554b05e91fb1b6ac1f3"></script></body>
 </html>

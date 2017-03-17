@@ -21,9 +21,10 @@ webpackJsonp([0],{
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	__webpack_require__(301);
-	__webpack_require__(302);
+	__webpack_require__(305);
+	__webpack_require__(306);
 	
-	var _ = __webpack_require__(306);
+	var _ = __webpack_require__(308);
 	
 	var app = _angular2.default.module('app', ['treeChooser']).controller('rdTreeChooserExample', function (rdTreeChooserExample) {
 	  var vm = this;
@@ -34,8 +35,9 @@ webpackJsonp([0],{
 	  vm.idProperty = 'id';
 	  vm.labelProperty = 'description';
 	  vm.childrenProperty = 'children';
-	  vm.filterAutoShowLength = 3;
+	  vm.filterAutoShowLength = 2;
 	  vm.enablePills = true;
+	  vm.modelAsId = true;
 	  vm.ngPlaceholder = 'Select a location...';
 	  vm.ngRequired = true;
 	
@@ -52,7 +54,7 @@ webpackJsonp([0],{
 	    bindToController: true,
 	    controller: 'rdTreeChooserExample',
 	    controllerAs: 'vm',
-	    template: __webpack_require__(308)
+	    template: __webpack_require__(310)
 	  };
 	}).service('rdTreeChooserExample', function () {
 	  this.getSampleData = function () {
@@ -151,7 +153,7 @@ webpackJsonp([0],{
 	        label: 'Mexico'
 	      }, {
 	        id: 'US',
-	        label: 'United States of America',
+	        label: 'United States',
 	        children: [{
 	          id: 'US-CA',
 	          label: 'California'
@@ -207,10 +209,52 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 308:
+/***/ 301:
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	
+	// load the styles
+	var content = __webpack_require__(302);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(304)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!../../node_modules/css-loader/index.js!../../node_modules/sass-loader/index.js!./app.scss", function() {
+				var newContent = require("!!../../node_modules/css-loader/index.js!../../node_modules/sass-loader/index.js!./app.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+
+/***/ 302:
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(303)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, "body {\n  padding-top: 50px; }\n\n.navbar-nav > li > span {\n  display: inline-block;\n  padding: 15px 0; }\n\n.jumbotron {\n  background-color: #2c3e50;\n  color: #fff; }\n\npre {\n  max-height: 250px; }\n\n.row {\n  margin-bottom: 15px; }\n", ""]);
+	
+	// exports
+
+
+/***/ },
+
+/***/ 310:
 /***/ function(module, exports) {
 
-	module.exports = "<h1>treeChooser</h1>\n\n<div class=\"col-sm-5\">\n  <h2>Options</h2>\n  <div>\n    <label>\n      tree-chooser\n    </label>\n    <p>\n      A tree structure in the format shown to the right\n    </p>\n  </div>\n  <div>\n    <label>\n      id-property <input type=\"text\" ng-model=\"vm.idProperty\" style=\"display:inline-block;\">\n    </label>\n    <p>\n      The property used to get the node's unique ID. Every node in tree should have a unique key.\n    </p>\n  </div>\n  <div>\n    <label>\n      label-property <input type=\"text\" ng-model=\"vm.labelProperty\" style=\"display:inline-block;\">\n    </label>\n    <p>\n      The property used to show the node's label. Alternatively the template can be modified.\n    </p>\n  </div>\n  <div>\n    <label>\n      children-property <input type=\"text\" ng-model=\"vm.childrenProperty\" style=\"display:inline-block;\">\n    </label>\n    <p>\n      The property used to get the node's children.\n    </p>\n  </div>\n  <div>\n    <label>\n      filter-node\n    </label>\n    <p>\n      A function to filter results when typing. If a node matches, all of its ancestors will still appear. The default filter contains is a case insensitive contains on the label property.\n    </p>\n  </div>\n  <div>\n    <label>\n      filter-auto-show-length <input type=\"number\" ng-model=\"vm.filterAutoShowLength\" style=\"display:inline-block;\">\n    </label>\n    <p>\n      When should items automatically expand.\n    </p>\n  </div>\n  <div>\n    <label>\n      disable-node\n    </label>\n    <p>\n      A function to disable a node from selection. Accepts the original node as an input and expects a boolean value in return. True to disable, false to keep enabled.\n    </p>\n  </div>\n  <div>\n    <label>\n      multiselect <input type=\"checkbox\" ng-model=\"vm.multiselect\">\n    </label>\n    <p>\n      Allow selection of multiple items.\n    </p>\n  </div>\n  <div>\n    <label>\n      only-leaves <input type=\"checkbox\" ng-model=\"vm.onlyLeaves\">\n    </label>\n    <p>\n      Only allow selection of leaf nodes.\n    </p>\n  </div>\n  <div>\n    <label>\n      selects-children <input type=\"checkbox\" ng-model=\"vm.selectsChildren\">\n    </label>\n    <p>\n      When selecting parent, all children (descendants) are selected.\n    </p>\n  </div>\n  <div>\n    <label>\n      deselects-children <input type=\"checkbox\" ng-model=\"vm.deselectsChildren\">\n    </label>\n    <p>\n      When deselecting parent, all children (descendants) are deselected.\n    </p>\n  </div>\n  <div>\n    <label>\n      enable-pills <input type=\"checkbox\" ng-model=\"vm.enablePills\">\n    </label>\n    <p>\n      Show pills in text box\n    </p>\n  </div>\n  <div>\n    <label>\n      restrict-model <input type=\"checkbox\" ng-model=\"vm.restrictModel\">\n    </label>\n    <p>\n      Restrict model to values that exist in tree structure.\n    </p>\n  </div>\n  <div>\n    <label>\n      ng-disabled <input type=\"checkbox\" ng-model=\"vm.ngDisabled\">\n    </label>\n  </div>\n  <div>\n    <label>\n      ng-placeholder <input type=\"text\" ng-model=\"vm.ngPlaceholder\" style=\"display:inline-block;\">\n    </label>\n  </div>\n  <div>\n    <label>\n      ng-required <input type=\"checkbox\" ng-model=\"vm.ngRequired\">\n    </label>\n  </div>\n</div>\n<div class=\"col-sm-3\">\n  <h2>Directive</h2>\n  <div tree-chooser=\"vm.treeData\"\n       ng-model=\"vm.model\"\n       ng-model-options=\"{ debounce: 100 }\"\n       multiselect=\"vm.multiselect\"\n       only-leaves=\"vm.onlyLeaves\"\n       selects-children=\"vm.selectsChildren\"\n       deselects-children=\"vm.deselectsChildren\"\n       enable-pills=\"vm.enablePills\"\n       restrict-model=\"vm.restrictModel\"\n       filter-auto-show-length=\"vm.filterAutoShowLength\"\n       ng-disabled=\"vm.ngDisabled\"\n       ng-placeholder=\"vm.ngPlaceholder\"\n       ng-required=\"vm.ngRequired\">\n  </div>\n</div>\n<div class=\"col-sm-2\">\n  <h2>Model</h2>\n  <span ng-repeat=\"item in vm.model\">\n    {{item.label}},\n  </span>\n</div>\n<div class=\"col-sm-2\">\n  <h2>Tree</h2>\n  <button ng-click=\"vm.resetItems()\">Reset</button>\n  <ul rd-tree=\"vm.treeData\"></ul>\n</div>\n"
+	module.exports = "<section id=\"documentation\">\n  <h2>Documentation</h2>\n\n  <div class=\"row\">\n    <div class=\"col-xs-6\">\n      <h4>\n        tree-chooser\n      </h4>\n      <p>\n        An tree data structure like the one to the right. Don't worry your data will not be modified in anyway. Want to structure yours slightly different? See the id, label and children properties below.\n      </p>\n      <div class=\"well well-sm\">\n        &lt;div tree-chooser=\"vm.items\"&gt;&lt;/div&gt;\n      </div>\n    </div>\n    <div class=\"col-xs-6\">\n      <pre>\n{\n  \"id\": \"NAc\",\n  \"label\": \"North America\",\n  \"children\": [\n    {\n      \"id\": \"CA\",\n      \"label\": \"Canada\"\n    },\n    {\n      \"id\": \"MX\",\n      \"label\": \"Mexico\"\n    },\n    {\n      \"id\": \"US\",\n      \"label\": \"United States\",\n      \"children\": [\n        {\n          \"id\": \"US-CA\",\n          \"label\": \"California\"\n        },\n        {\n          \"id\": \"US-NY\",\n          \"label\": \"New York\"\n        },\n        {\n          \"id\": \"US-TX\",\n          \"label\": \"Texas\"\n        }\n      ]\n    }\n  ]\n}\n      </pre>\n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"col-xs-4\">\n      <h4>\n        id-property\n      </h4>\n      <p>\n        The property used to uniquely identify the nodes. Each node must have a unique ID. Defaults to 'id'.\n      </p>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        label-property\n      </h4>\n      <p>\n        The property used to show the node's label. Defaults to 'label'.\n      </p>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        children-property\n      </h4>\n      <p>\n        The property used to obtain the node's children. Defaults to 'children'.\n      </p>\n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"col-xs-4\">\n      <h4>\n        filter-node\n      </h4>\n      <p>\n        A function to filter results when typing. If a node matches, all of its ancestors will still appear. Default filter is a case insensitive contains on the label property.\n      </p>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        filter-auto-show-length\n      </h4>\n      <p>\n        The items will automatically open once the filter text length has reached this amount. Defaults to 2.\n        <input type=\"number\" ng-model=\"vm.filterAutoShowLength\">\n      </p>\n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"col-xs-4\">\n      <h4>\n        <input type=\"checkbox\" ng-model=\"vm.multiselect\"> multiselect\n      </h4>\n      <p>\n        Allow selection of multiple items. Defaults to <i>true</i>.\n      </p>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        disable-node\n      </h4>\n      <p>\n        A function to disable a node from selection. Accepts the original node as an input and expects a boolean value in return. True to disable, false to keep enabled. Defaults to a function that returns false.\n      </p>\n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"col-xs-4\">\n      <h4>\n        <input type=\"checkbox\" ng-model=\"vm.onlyLeaves\"> only-leaves\n      </h4>\n      <p>\n        Only allow selection of leaf nodes. Defaults to <i>false</i>.\n      </p>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        <input type=\"checkbox\" ng-model=\"vm.selectsChildren\"> selects-children\n      </h4>\n      <p>\n        When selecting parent, all children (descendants) are selected. Defaults to <i>false</i>.\n      </p>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        <input type=\"checkbox\" ng-model=\"vm.deselectsChildren\"> deselects-children\n      </h4>\n      <p>\n        When deselecting parent, all children (descendants) are deselected. Defaults to <i>false</i>.\n      </p>\n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"col-xs-4\">\n      <h4>\n        <input type=\"checkbox\" ng-model=\"vm.enablePills\"> enable-pills\n      </h4>\n      <p>\n        Show pills in text box. Defaults to <i>true</i>.\n      </p>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        <input type=\"checkbox\" ng-model=\"vm.modelAsId\"> model-as-id\n      </h4>\n      <p>\n        Use ID as model value.  Defaults to <i>true</i>.\n      </p>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        <input type=\"checkbox\" ng-model=\"vm.restrictModel\"> restrict-model\n      </h4>\n      <p>\n        Restrict model to values that exist in tree structure. Defaults to <i>false</i>.\n      </p>\n    </div>\n  </div>\n\n  <div class=\"row\">\n    <h3>Supports</h3>\n    <div class=\"col-xs-4\">\n      <h4>\n        <input type=\"checkbox\" ng-model=\"vm.ngRequired\"> ng-required\n      </h4>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        ng-disabled <input type=\"checkbox\" ng-model=\"vm.ngDisabled\">\n      </h4>\n    </div>\n    <div class=\"col-xs-4\">\n      <h4>\n        ng-placeholder\n      </h4>\n      <p>\n        <input type=\"text\" ng-model=\"vm.ngPlaceholder\">\n      </p>\n    </div>\n  </div>\n</section>\n\n<section id=\"example\">\n  <h2>Example</h2>\n\n  <div class=\"col-sm-4\">\n    <h2>Directive</h2>\n    <div tree-chooser=\"vm.treeData\"\n         ng-model=\"vm.model\"\n         ng-model-options=\"{ debounce: 100 }\"\n         multiselect=\"vm.multiselect\"\n         only-leaves=\"vm.onlyLeaves\"\n         selects-children=\"vm.selectsChildren\"\n         deselects-children=\"vm.deselectsChildren\"\n         enable-pills=\"vm.enablePills\"\n         restrict-model=\"vm.restrictModel\"\n         filter-auto-show-length=\"vm.filterAutoShowLength\"\n         model-as-id=\"vm.modelAsId\"\n         ng-disabled=\"vm.ngDisabled\"\n         ng-placeholder=\"vm.ngPlaceholder\"\n         ng-required=\"vm.ngRequired\">\n    </div>\n  </div>\n  <div class=\"col-sm-4\">\n    <h2>Model</h2>\n    <span ng-repeat=\"item in vm.model\">\n    {{vm.modelAsId ? item : item.label}},\n  </span>\n  </div>\n  <div class=\"col-sm-4\">\n    <h2>\n      Tree\n      <button class=\"btn btn-sm btn-primary\"\n              ng-click=\"vm.resetItems()\">\n        Reset\n      </button>\n    </h2>\n    <ul rd-tree=\"vm.treeData\"></ul>\n  </div>\n</section>\n"
 
 /***/ }
 
