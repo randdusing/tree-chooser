@@ -180,7 +180,13 @@
 	       * Enable pills
 	       * @type {boolean}
 	       */
-	      enablePills: '=?'
+	      enablePills: '=?',
+	
+	      /**
+	       * Just use the ID as the model value?
+	       * @type {boolean}
+	       */
+	      modelAsId: '=?'
 	    },
 	    template: __webpack_require__(8),
 	    link: function link(scope, element) {
@@ -231,7 +237,7 @@
 /* 8 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=treeChooser> <div class=treeChooser-input> <span ng-if=vm.enablePills ng-repeat=\"item in vm.ngModel.$modelValue\"> {{item.label}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=\"{'top': getListOffset()}\" class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";
+	module.exports = "<div class=treeChooser> <div class=treeChooser-input> <span ng-if=vm.enablePills ng-click=vm.removeFromModel(item) ng-repeat=\"item in vm.getModelAsItems()\"> {{item.label}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=\"{'top': getListOffset()}\" class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";
 
 /***/ },
 /* 9 */
@@ -280,6 +286,18 @@
 	  // Disable restrict model by default
 	  if (_.isUndefined(vm.restrictModel)) {
 	    vm.restrictModel = false;
+	  }
+	  // Enable pills by default
+	  if (_.isUndefined(vm.enablePills)) {
+	    vm.enablePills = true;
+	  }
+	  // Save ID to model by default
+	  if (_.isUndefined(vm.modelAsId)) {
+	    vm.modelAsId = true;
+	  }
+	  // Auto show after specified filter text length
+	  if (!_.isNumber(vm.filterAutoShowLength)) {
+	    vm.filterAutoShowLength = 2;
 	  }
 	  // Default filter node function
 	  if (!_.isFunction(vm.filterNode)) {
@@ -331,39 +349,47 @@
 	  vm.onListKeyDown = function ($event) {
 	    var shouldStop = false;
 	
-	    switch ($event.code) {
-	      case 'Escape':
+	    switch ($event.keyCode) {
+	      case 27:
+	        //Escape
 	        shouldStop = true;
 	        vm.close(true);
 	        $scope.focusInput();
 	        break;
-	      case 'Enter':
+	      case 13:
+	        //Enter
 	        shouldStop = true;
 	        vm.toggleSelectedActive();
 	        vm.close(true);
 	        $scope.focusInput();
 	        break;
-	      case 'ArrowDown':
+	      case 40:
+	        //Down Arrow
 	        shouldStop = true;
 	        vm.next();
 	        break;
-	      case 'ArrowUp':
+	      case 38:
+	        //Up Arrow
 	        shouldStop = true;
 	        vm.prev();
 	        break;
-	      case 'ArrowLeft':
+	      case 37:
+	        //Left Arrow
 	        shouldStop = true;
 	        vm.collapseActive();
 	        break;
-	      case 'ArrowRight':
+	      case 39:
+	        //Right Arrow
 	        shouldStop = true;
 	        vm.expandActive();
 	        break;
-	      case 'Space':
+	      case 32:
+	        //Space
 	        shouldStop = true;
 	        vm.toggleSelectedActive();
 	        break;
-	      case 'Tab':
+	      case 9:
+	        //Tab
 	        vm.close(true);
 	        break;
 	    }
@@ -379,16 +405,25 @@
 	   * @param {Object} $event
 	   */
 	  vm.onTextKeyDown = function ($event) {
-	    switch ($event.code) {
-	      case 'Escape':
+	    switch ($event.keyCode) {
+	      case 27:
+	        //Escape
 	        vm.close(true);
 	        break;
-	      case 'Enter':
+	      case 13:
+	        //Enter
 	        vm.show($event);
 	        break;
-	      case 'ArrowDown':
+	      case 40:
+	        //Down Arrow
 	        vm.show($event);
 	        $scope.focusList();
+	        break;
+	      case 8:
+	        //Backspace
+	        if (!_.isEmpty(vm.ngModel.$viewValue)) {
+	          vm.ngModel.$viewValue.pop();
+	        }
 	        break;
 	    }
 	  };
@@ -479,6 +514,15 @@
 	    if (active) {
 	      active.setExpanded(false);
 	    }
+	  };
+	
+	  /**
+	   * Set all items inactive
+	   */
+	  vm.clearActive = function () {
+	    _.forEach(vm.itemsFlat, function (item) {
+	      item.setActive(false);
+	    });
 	  };
 	
 	  /**
@@ -627,12 +671,23 @@
 	  };
 	
 	  /**
+	   * Get model as items because it could be ssaved as id
+	   */
+	  vm.getModelAsItems = function () {
+	    if (vm.modelAsId) {
+	      return _.map(vm.ngModel.$viewValue, function (id) {
+	        return vm.itemsIndex[id].getItem();
+	      });
+	    } else {
+	      return vm.ngModel.$viewValue;
+	    }
+	  };
+	
+	  /**
 	   * Add item to model and trigger validation
-	   * @todo is cloning necessary?
 	   */
 	  vm.addToModel = function (item) {
-	    var clone = _.cloneDeep(item.getItem());
-	    vm.ngModel.$viewValue.push(clone);
+	    vm.ngModel.$viewValue.push(vm.modelAsId ? item.getId() : item.getItem());
 	    vm.ngModel.$validate();
 	  };
 	
@@ -642,7 +697,7 @@
 	  vm.removeFromModel = function (item) {
 	    var id = _.get(item, properties.id);
 	    _.remove(vm.ngModel.$viewValue, function (item) {
-	      return _.get(item, properties.id) === id;
+	      return vm.modelAsId ? item === id : _.get(item, properties.id) === id;
 	    });
 	    vm.ngModel.$validate();
 	  };
@@ -663,14 +718,11 @@
 	      item.setSelected(false);
 	    });
 	
-	    var index = _.keyBy(vm.itemsFlat, function (item) {
-	      return item.getId();
-	    });
-	
 	    var toDelete = [];
 	    // Set selected items back to true
 	    _.forEach(vm.ngModel.$modelValue, function (item) {
-	      var checkItem = index[_.get(item, properties.id)];
+	      var id = vm.modelAsId ? item : _.get(item, properties.id);
+	      var checkItem = vm.itemsIndex[id];
 	      if (checkItem) {
 	        checkItem.setSelected(true);
 	      } else if (vm.restrictModel) {
@@ -724,10 +776,7 @@
 	  /**
 	   * Sync on items change
 	   */
-	  $scope.$watch(function () {
-	    // @todo whats more expensive, flatten list and doing watchCollection or this?
-	    return JSON.stringify(vm.treeData);
-	  }, function () {
+	  $scope.$watch('vm.treeData', function () {
 	    // @todo is this manual GC needed?
 	    _.forEach(vm.itemsFlat, function (item, index) {
 	      delete vm.itemsFlat[index];
@@ -737,9 +786,13 @@
 	    vm.items = vm.createItems(vm.treeData);
 	    // Flatten into a sorted list for easier navigation
 	    vm.itemsFlat = vm.flattenItems(vm.items);
+	    // Item index
+	    vm.itemsIndex = _.keyBy(vm.itemsFlat, function (item) {
+	      return item.getId();
+	    });
 	
 	    vm.syncModelToItems();
-	  });
+	  }, true);
 	
 	  /**
 	   * Sync on restrict model
@@ -17922,7 +17975,7 @@
 /* 14 */
 /***/ function(module, exports) {
 
-	module.exports = "<span class=treeChooser-item ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";
+	module.exports = "<span class=treeChooser-item ng-mouseover=\"vm.chooserVm.clearActive(); vm.item.setActive(true)\" ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";
 
 /***/ },
 /* 15 */
