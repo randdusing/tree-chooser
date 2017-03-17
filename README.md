@@ -4,8 +4,12 @@ A simple Tree Chooser for Angular
 ## Installation
 ``` npm install tree-chooser --save ```
 
+## Documentation
+See [here](http://randdusing.com/tree-chooser/).
+
 ## Todo
 - Allow better templating for pills and list
+- Improve dropdown styles (auto positioning, auto width, etc)
 - Create example / documentation website
 - Add test coverage
 - Improve styles
