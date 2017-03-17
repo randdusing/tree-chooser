@@ -95,39 +95,39 @@ function TreeChooserController(
   vm.onListKeyDown = function ($event) {
     var shouldStop = false;
 
-    switch ($event.code) {
-      case 'Escape':
+    switch ($event.keyCode) {
+      case 27: //Escape
         shouldStop = true;
         vm.close(true);
         $scope.focusInput();
         break;
-      case 'Enter':
+      case 13: //Enter
         shouldStop = true;
         vm.toggleSelectedActive();
         vm.close(true);
         $scope.focusInput();
         break;
-      case 'ArrowDown':
+      case 40: //Down Arrow
         shouldStop = true;
         vm.next();
         break;
-      case 'ArrowUp':
+      case 38: //Up Arrow
         shouldStop = true;
         vm.prev();
         break;
-      case 'ArrowLeft':
+      case 37: //Left Arrow
         shouldStop = true;
         vm.collapseActive();
         break;
-      case 'ArrowRight':
+      case 39: //Right Arrow
         shouldStop = true;
         vm.expandActive();
         break;
-      case 'Space':
+      case 32: //Space
         shouldStop = true;
         vm.toggleSelectedActive();
         break;
-      case 'Tab':
+      case 9: //Tab
         vm.close(true);
         break;
     }
@@ -143,16 +143,21 @@ function TreeChooserController(
    * @param {Object} $event
    */
   vm.onTextKeyDown = function ($event) {
-    switch ($event.code) {
-      case 'Escape':
+    switch ($event.keyCode) {
+      case 27: //Escape
         vm.close(true);
         break;
-      case 'Enter':
+      case 13: //Enter
         vm.show($event);
         break;
-      case 'ArrowDown':
+      case 40: //Down Arrow
         vm.show($event);
         $scope.focusList();
+        break;
+      case 8: //Backspace
+        if (!_.isEmpty(vm.ngModel.$viewValue)) {
+          vm.ngModel.$viewValue.pop();
+        }
         break;
     }
   };
