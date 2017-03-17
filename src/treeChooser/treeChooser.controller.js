@@ -510,10 +510,7 @@ function TreeChooserController(
   /**
    * Sync on items change
    */
-  $scope.$watch(function () {
-    // @todo whats more expensive, flatten list and doing watchCollection or this?
-    return JSON.stringify(vm.treeData);
-  }, function () {
+  $scope.$watch('vm.treeData', function () {
     // @todo is this manual GC needed?
     _.forEach(vm.itemsFlat, function (item, index) {
       delete vm.itemsFlat[index];
@@ -529,7 +526,7 @@ function TreeChooserController(
     });
 
     vm.syncModelToItems();
-  });
+  }, true);
 
   /**
    * Sync on restrict model
