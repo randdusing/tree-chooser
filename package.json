@@ -1,6 +1,6 @@
 {
   "name": "tree-chooser",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Tree Chooser for Angular",
   "main": "dist/tree-chooser.js",
   "dependencies": {
