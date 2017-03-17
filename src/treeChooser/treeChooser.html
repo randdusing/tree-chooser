@@ -1,7 +1,8 @@
 <div class="treeChooser">
   <div class="treeChooser-input">
     <span ng-if="vm.enablePills"
-          ng-repeat="item in vm.ngModel.$modelValue">
+          ng-click="vm.removeFromModel(item)"
+          ng-repeat="item in vm.getModelAsItems()">
       {{item.label}}
     </span>
     <input type="text"

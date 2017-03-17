@@ -45,6 +45,10 @@ function TreeChooserController(
   if (_.isUndefined(vm.restrictModel)) {
     vm.restrictModel = false;
   }
+  // Save ID to model by default
+  if (_.isUndefined(vm.modelAsId)) {
+    vm.modelAsId = true;
+  }
   // Default filter node function
   if (!_.isFunction(vm.filterNode)) {
     vm.filterNode = function (item, filterText) {
@@ -398,12 +402,23 @@ function TreeChooserController(
   };
 
   /**
+   * Get model as items because it could be ssaved as id
+   */
+  vm.getModelAsItems = function () {
+    if (vm.modelAsId) {
+      return _.map(vm.ngModel.$viewValue, function (id) {
+        return vm.itemsIndex[id].getItem();
+      });
+    } else {
+      return vm.ngModel.$viewValue;
+    }
+  };
+
+  /**
    * Add item to model and trigger validation
-   * @todo is cloning necessary?
    */
   vm.addToModel = function (item) {
-    var clone = _.cloneDeep(item.getItem());
-    vm.ngModel.$viewValue.push(clone);
+    vm.ngModel.$viewValue.push(vm.modelAsId ? item.getId() : item.getItem());
     vm.ngModel.$validate();
   };
 
@@ -413,7 +428,7 @@ function TreeChooserController(
   vm.removeFromModel = function (item) {
     var id = _.get(item, properties.id);
     _.remove(vm.ngModel.$viewValue, function (item) {
-      return _.get(item, properties.id) === id;
+      return vm.modelAsId ? item === id : _.get(item, properties.id) === id;
     });
     vm.ngModel.$validate();
   };
@@ -434,14 +449,11 @@ function TreeChooserController(
       item.setSelected(false);
     });
 
-    var index = _.keyBy(vm.itemsFlat, function (item) {
-      return item.getId();
-    });
-
     var toDelete = [];
     // Set selected items back to true
     _.forEach(vm.ngModel.$modelValue, function (item) {
-      var checkItem = index[_.get(item, properties.id)];
+      var id = vm.modelAsId ? item : _.get(item, properties.id);
+      var checkItem = vm.itemsIndex[id];
       if (checkItem) {
         checkItem.setSelected(true);
       } else if (vm.restrictModel) {
@@ -511,6 +523,10 @@ function TreeChooserController(
     vm.items = vm.createItems(vm.treeData);
     // Flatten into a sorted list for easier navigation
     vm.itemsFlat = vm.flattenItems(vm.items);
+    // Item index
+    vm.itemsIndex = _.keyBy(vm.itemsFlat, function (item) {
+      return item.getId();
+    });
 
     vm.syncModelToItems();
   });

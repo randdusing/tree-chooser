@@ -101,7 +101,13 @@ function TreeChooser($timeout) {
        * Enable pills
        * @type {boolean}
        */
-      enablePills: '=?'
+      enablePills: '=?',
+
+      /**
+       * Just use the ID as the model value?
+       * @type {boolean}
+       */
+      modelAsId: '=?'
     },
     template: require('./treeChooser.html'),
     link: function (scope, element) {
