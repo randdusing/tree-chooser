@@ -45,9 +45,17 @@ function TreeChooserController(
   if (_.isUndefined(vm.restrictModel)) {
     vm.restrictModel = false;
   }
+  // Enable pills by default
+  if (_.isUndefined(vm.enablePills)) {
+    vm.enablePills = true;
+  }
   // Save ID to model by default
   if (_.isUndefined(vm.modelAsId)) {
     vm.modelAsId = true;
+  }
+  // Auto show after specified filter text length
+  if (!_.isNumber(vm.filterAutoShowLength)) {
+    vm.filterAutoShowLength = 2;
   }
   // Default filter node function
   if (!_.isFunction(vm.filterNode)) {
