@@ -255,6 +255,15 @@ function TreeChooserController(
   };
 
   /**
+   * Set all items inactive
+   */
+  vm.clearActive = function () {
+    _.forEach(vm.itemsFlat, function (item) {
+      item.setActive(false);
+    });
+  };
+
+  /**
    * Toggle selection on active item
    */
   vm.toggleSelectedActive = function () {

@@ -1,8 +1,9 @@
 <span class="treeChooser-item"
+      ng-mouseover="vm.chooserVm.clearActive(); vm.item.setActive(true)"
       ng-class="{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}">
   <!-- Expansion -->
   <span class="treeChooser-expansion"
-        ng-click="vm.item.setActive(true); vm.item.toggleExpanded()">
+        ng-click="vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()">
     <span ng-show="vm.item.hasAChildPresent() && vm.item.isExpanded()"
           class="treeChooser-expanded">-</span>
     <span ng-show="vm.item.hasAChildPresent() && !vm.item.isExpanded()"
