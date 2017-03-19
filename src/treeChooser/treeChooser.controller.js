@@ -444,9 +444,13 @@ function TreeChooserController(
    */
   vm.getModelAsItems = function () {
     if (vm.modelAsId) {
-      return _.map(vm.ngModel.$viewValue, function (id) {
-        return vm.itemsIndex[id].getItem();
-      });
+      return _(vm.ngModel.$viewValue)
+        .map(function (id) {
+          // Can' guarantee the item still exists unless restrict model is on
+          return _.invoke(vm.itemsIndex[id], 'getItem');
+        })
+        .compact()
+        .value();
     } else {
       return vm.ngModel.$viewValue;
     }
