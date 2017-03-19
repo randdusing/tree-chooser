@@ -557,7 +557,7 @@ function TreeChooserController(
     });
 
     vm.syncModelToItems();
-  }, true);
+  });
 
   /**
    * Sync on restrict model
