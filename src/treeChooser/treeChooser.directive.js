@@ -111,20 +111,22 @@ function TreeChooser($timeout) {
     },
     template: require('./treeChooser.html'),
     link: function (scope, element) {
-      // @todo clean up query selectors to not rely on classes
       var input = angular.element(element[0].querySelector('.treeChooser-input input'));
       input.on('click', function (event) {
         event.stopPropagation();
       });
+
       var list = angular.element(element[0].querySelector('.treeChooser-list'));
       list.on('click', function (event) {
         event.stopPropagation();
       });
+
       scope.focusInput = function () {
         $timeout(function () {
           input[0].focus();
         });
       };
+
       scope.focusList = function () {
         $timeout(function () {
           list[0].focus();
