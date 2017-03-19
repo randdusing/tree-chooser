@@ -1,6 +1,9 @@
 .treeChooser {
   position: relative;
 }
+.treeChooser-input-focused {
+  outline: -webkit-focus-ring-color auto 5px;
+}
 .treeChooser-input {
   border: 1px solid #000;
 }
