@@ -19,7 +19,7 @@
   <ul ng-show="vm.shown"
       ng-keydown="vm.onListKeyDown($event)"
       ng-focus="vm.next()"
-      ng-style="{'top': getListOffset()}"
+      ng-style="getListStyles()"
       class="treeChooser-list"
       tabindex="-1">
     <li ng-repeat="item in vm.getPresentItems()"

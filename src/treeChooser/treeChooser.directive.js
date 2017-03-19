@@ -130,9 +130,14 @@ function TreeChooser($timeout) {
           list[0].focus();
         });
       };
-      scope.getListOffset = function () {
-        return input[0].parentNode.offsetHeight + 'px';
+
+      scope.getListStyles = function () {
+        return {
+          top: input[0].parentNode.offsetHeight + 'px',
+          width: input[0].parentNode.offsetWidth + 'px'
+        };
       };
+
       scope.scrollActive = function () {
         $timeout(function () {
           var active = element[0].querySelector('.treeChooser-active');
