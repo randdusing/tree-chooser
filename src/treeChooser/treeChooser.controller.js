@@ -185,6 +185,9 @@ function TreeChooserController(
           vm.ngModel.$viewValue.pop();
         }
         break;
+      case 9: //Tab
+        vm.close();
+        break;
     }
   };
 
