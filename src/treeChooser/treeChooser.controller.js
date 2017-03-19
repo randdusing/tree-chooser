@@ -181,7 +181,7 @@ function TreeChooserController(
         $scope.focusList();
         break;
       case 8: //Backspace
-        if (!_.isEmpty(vm.ngModel.$viewValue)) {
+        if (_.isEmpty(vm.filterText) && !_.isEmpty(vm.ngModel.$viewValue)) {
           vm.ngModel.$viewValue.pop();
         }
         break;
