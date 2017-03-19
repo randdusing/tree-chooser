@@ -124,13 +124,13 @@ function TreeChooserController(
     switch ($event.keyCode) {
       case 27: //Escape
         shouldStop = true;
-        vm.close(true);
+        vm.close();
         $scope.focusInput();
         break;
       case 13: //Enter
         shouldStop = true;
         vm.toggleSelectedActive();
-        vm.close(true);
+        vm.close();
         $scope.focusInput();
         break;
       case 40: //Down Arrow
@@ -154,7 +154,7 @@ function TreeChooserController(
         vm.toggleSelectedActive();
         break;
       case 9: //Tab
-        vm.close(true);
+        vm.close();
         break;
     }
 
@@ -171,7 +171,7 @@ function TreeChooserController(
   vm.onTextKeyDown = function ($event) {
     switch ($event.keyCode) {
       case 27: //Escape
-        vm.close(true);
+        vm.close();
         break;
       case 13: //Enter
         vm.show($event);
