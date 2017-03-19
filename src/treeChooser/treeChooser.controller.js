@@ -174,7 +174,11 @@ function TreeChooserController(
         vm.close();
         break;
       case 13: //Enter
-        vm.show($event);
+        if (vm.shown) {
+          vm.toggleSelectedActive();
+        } else {
+          vm.show($event);
+        }
         break;
       case 40: //Down Arrow
         vm.show($event);
