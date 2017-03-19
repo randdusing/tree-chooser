@@ -81,6 +81,8 @@ function TreeChooserController(
 
     vm.shown = true;
 
+    vm.next();
+
     // Add event listener to determine when user clicks outside of tree chooser
     $window.addEventListener('click', vm.closeFromClick);
   };
