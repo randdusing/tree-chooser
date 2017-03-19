@@ -4,7 +4,7 @@
     <span ng-if="vm.enablePills"
           ng-click="vm.removeFromModel(item); focusInput()"
           ng-repeat="item in vm.getModelAsItems()">
-      {{item.label}}
+      {{item[vm.properties.label]}}
     </span>
     <input type="text"
            ng-disabled="vm.ngDisabled"

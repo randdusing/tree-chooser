@@ -24,6 +24,7 @@ function TreeChooserController(
     label: vm.labelProperty || 'label',
     children: vm.childrenProperty || 'children'
   };
+  vm.properties = properties;
 
   // Enable multiselect by default
   if (_.isUndefined(vm.multiselect)) {
