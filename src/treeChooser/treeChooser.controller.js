@@ -91,6 +91,7 @@ function TreeChooserController(
    * Close the search results, remove outside click handler
    */
   vm.close = function () {
+    vm.reset();
     vm.shown = false;
     $window.removeEventListener('click', vm.closeFromClick);
   };
@@ -101,6 +102,16 @@ function TreeChooserController(
   vm.closeFromClick = function () {
     vm.close();
     $scope.$apply();
+  };
+
+  /**
+   * Reset the collapsed and active state
+   */
+  vm.reset = function () {
+    _.forEach(vm.itemsFlat, function (item) {
+      item.setActive(false);
+      item.setExpanded(false);
+    });
   };
 
   /**
