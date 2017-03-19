@@ -140,8 +140,8 @@ function TreeChooser($timeout) {
 
       scope.scrollActive = function () {
         $timeout(function () {
-          var active = element[0].querySelector('.treeChooser-active');
-          list[0].scrollTop = active.offsetTop - 12; // @todo this should be about font size
+          var active = element[0].querySelector('.treeChooser-active .treeChooser-label');
+          list[0].scrollTop = active.offsetTop;
         });
       };
     }
