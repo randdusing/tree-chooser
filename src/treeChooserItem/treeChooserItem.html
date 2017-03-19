@@ -1,5 +1,4 @@
 <span class="treeChooser-item"
-      ng-mouseover="vm.chooserVm.clearActive(); vm.item.setActive(true)"
       ng-class="{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}">
   <!-- Expansion -->
   <span class="treeChooser-expansion"
@@ -13,7 +12,7 @@
   <!-- Label @todo turn into template -->
   <span class="treeChooser-label"
         ng-class="{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}"
-        ng-click="vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)">
+        ng-click="vm.chooserVm.clearActive(); vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)">
     {{vm.item.getLabel()}}
   </span>
 

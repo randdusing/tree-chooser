@@ -34,6 +34,18 @@
   max-height: 200px;
   overflow: auto;
 }
+.treeChooser-item {
+  display: inline-block;
+  width: 100%;
+}
+.treeChooser-label {
+  border-radius: 5px;
+  display: inline-block;
+  padding: 1px 3px;
+}
+.treeChooser-label:hover {
+  background-color: #ecf0f1;
+}
 .treeChooser-selected  > .treeChooser-label {
   color: #0a9dc7;
   font-weight: bold;
