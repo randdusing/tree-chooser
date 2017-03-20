@@ -41979,14 +41979,12 @@
 		       */enablePills:'=?',/**
 		       * Just use the ID as the model value?
 		       * @type {boolean}
-		       */modelAsId:'=?'},template:__webpack_require__(8),link:function link(scope,element){// @todo clean up query selectors to not rely on classes
-	var input=angular.element(element[0].querySelector('.treeChooser-input input'));input.on('click',function(event){event.stopPropagation();});var list=angular.element(element[0].querySelector('.treeChooser-list'));list.on('click',function(event){event.stopPropagation();});scope.focusInput=function(){$timeout(function(){input[0].focus();});};scope.focusList=function(){$timeout(function(){list[0].focus();});};scope.getListOffset=function(){return input[0].parentNode.offsetHeight+'px';};scope.scrollActive=function(){$timeout(function(){var active=element[0].querySelector('.treeChooser-active');list[0].scrollTop=active.offsetTop-12;// @todo this should be about font size
-	});};}};}module.exports=TreeChooser;/***/},/* 4 *//***/function(module,exports){// removed by extract-text-webpack-plugin
-	/***/},,,,/* 5 *//* 6 *//* 7 *//* 8 *//***/function(module,exports){module.exports="<div class=treeChooser> <div class=treeChooser-input> <span ng-if=vm.enablePills ng-click=vm.removeFromModel(item) ng-repeat=\"item in vm.getModelAsItems()\"> {{item.label}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=\"{'top': getListOffset()}\" class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";/***/},/* 9 *//***/function(module,exports,__webpack_require__){'use strict';/*@ngInject*/TreeChooserController.$inject=['$element','$scope','$window','TreeChooserItem'];function TreeChooserController($element,$scope,$window,TreeChooserItem){var vm=this,_=__webpack_require__(10);// Flag to determine whether search results are showing
+		       */modelAsId:'=?'},template:__webpack_require__(8),link:function link(scope,element){var input=angular.element(element[0].querySelector('.treeChooser-input input'));input.on('click',function(event){event.stopPropagation();});var list=angular.element(element[0].querySelector('.treeChooser-list'));list.on('click',function(event){event.stopPropagation();});scope.focusInput=function(){$timeout(function(){input[0].focus();});};scope.focusList=function(){$timeout(function(){list[0].focus();});};scope.getListStyles=function(){return{top:input[0].parentNode.offsetHeight+'px',width:input[0].parentNode.offsetWidth+'px'};};scope.scrollActive=function(){$timeout(function(){var active=element[0].querySelector('.treeChooser-active .treeChooser-label');list[0].scrollTop=active.offsetTop;});};}};}module.exports=TreeChooser;/***/},/* 4 *//***/function(module,exports){// removed by extract-text-webpack-plugin
+	/***/},,,,/* 5 *//* 6 *//* 7 *//* 8 *//***/function(module,exports){module.exports="<div class=treeChooser> <div class=treeChooser-input ng-class=\"{'treeChooser-input-focused': vm.focused}\"> <span ng-if=vm.enablePills ng-click=\"vm.removeFromModel(item); focusInput()\" ng-repeat=\"item in vm.getModelAsItems()\"> {{item[vm.properties.label]}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) ng-focus=\"vm.focused = true\" ng-blur=\"vm.focused = false\" placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=getListStyles() class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";/***/},/* 9 *//***/function(module,exports,__webpack_require__){'use strict';/*@ngInject*/TreeChooserController.$inject=['$element','$scope','$window','TreeChooserItem'];function TreeChooserController($element,$scope,$window,TreeChooserItem){var vm=this,_=__webpack_require__(10);// Flag to determine whether search results are showing
 	vm.shown=false;// Get access to ngModel
 	vm.ngModel=$element.controller('ngModel');// And override $isEmpty to account for array emptiness
 	vm.ngModel.$isEmpty=_.isEmpty;// Properties use to access special parts of item
-	var properties={id:vm.idProperty||'id',label:vm.labelProperty||'label',children:vm.childrenProperty||'children'};// Enable multiselect by default
+	var properties={id:vm.idProperty||'id',label:vm.labelProperty||'label',children:vm.childrenProperty||'children'};vm.properties=properties;// Enable multiselect by default
 	if(_.isUndefined(vm.multiselect)){vm.multiselect=true;}// Disable only leaves by default
 	if(_.isUndefined(vm.onlyLeaves)){vm.onlyLeaves=false;}// Disable selects children by default
 	if(_.isUndefined(vm.selectsChildren)){vm.selectsChildren=false;}// Disable deselects children by default
@@ -41999,30 +41997,33 @@
 	if(!_.isFunction(vm.disableNode)){vm.disableNode=_.stubFalse;}// @todo create a separate directive for the list
 	/**
 		   * Show the search results, add outside click handler
-		   */vm.show=function(){if(vm.shown){return;}vm.shown=true;// Add event listener to determine when user clicks outside of tree chooser
+		   */vm.show=function(){if(vm.shown){return;}vm.shown=true;vm.next();// Add event listener to determine when user clicks outside of tree chooser
 	$window.addEventListener('click',vm.closeFromClick);};/**
 		   * Close the search results, remove outside click handler
-		   */vm.close=function(){vm.shown=false;$window.removeEventListener('click',vm.closeFromClick);};/**
+		   */vm.close=function(){vm.reset();vm.shown=false;$window.removeEventListener('click',vm.closeFromClick);};/**
 		   * Close on outside click
 		   */vm.closeFromClick=function(){vm.close();$scope.$apply();};/**
+		   * Reset the collapsed and active state
+		   */vm.reset=function(){_.forEach(vm.itemsFlat,function(item){item.setActive(false);item.setExpanded(false);});};/**
 		   * Handle results keyboard navigation
 		   * @param {Object} $event
 		   */vm.onListKeyDown=function($event){var shouldStop=false;switch($event.keyCode){case 27://Escape
-	shouldStop=true;vm.close(true);$scope.focusInput();break;case 13://Enter
-	shouldStop=true;vm.toggleSelectedActive();vm.close(true);$scope.focusInput();break;case 40://Down Arrow
+	shouldStop=true;vm.close();$scope.focusInput();break;case 13://Enter
+	shouldStop=true;vm.toggleSelectedActive();vm.close();$scope.focusInput();break;case 40://Down Arrow
 	shouldStop=true;vm.next();break;case 38://Up Arrow
 	shouldStop=true;vm.prev();break;case 37://Left Arrow
 	shouldStop=true;vm.collapseActive();break;case 39://Right Arrow
 	shouldStop=true;vm.expandActive();break;case 32://Space
 	shouldStop=true;vm.toggleSelectedActive();break;case 9://Tab
-	vm.close(true);break;}if(shouldStop){$event.preventDefault();$event.stopPropagation();}};/**
+	vm.close();break;}if(shouldStop){$event.preventDefault();$event.stopPropagation();}};/**
 		   * Handle input keyboard navigation
 		   * @param {Object} $event
 		   */vm.onTextKeyDown=function($event){switch($event.keyCode){case 27://Escape
-	vm.close(true);break;case 13://Enter
-	vm.show($event);break;case 40://Down Arrow
+	vm.close();break;case 13://Enter
+	if(vm.shown){vm.toggleSelectedActive();}else{vm.show($event);}break;case 40://Down Arrow
 	vm.show($event);$scope.focusList();break;case 8://Backspace
-	if(!_.isEmpty(vm.ngModel.$viewValue)){vm.ngModel.$viewValue.pop();}break;}};/**
+	if(_.isEmpty(vm.filterText)&&!_.isEmpty(vm.ngModel.$viewValue)){vm.ngModel.$viewValue.pop();}break;case 9://Tab
+	vm.close();break;}};/**
 		   * Find next visible item
 		   */vm.next=function(){var active=vm.findActive();if(!active){var first=_.find(vm.itemsFlat,function(item){return item.isShowing();});first.setActive(true);}else{var start=_.findIndex(vm.itemsFlat,function(item){return item.isActive();});active.setActive(false);// @todo optimize array traversal
 	var next=_.find(vm.itemsFlat,function(item,index){return index>start&&item.isShowing();});if(!next){next=_.find(vm.itemsFlat,function(item,index){return index<start&&item.isShowing();});}if(next){next.setActive(true);}}$scope.scrollActive();};/**
@@ -42064,7 +42065,8 @@
 		   * @todo if deselect Children is enabled, won't this deselect leaves?
 		   */vm.clearBranches=function(){_.forEach(vm.itemsFlat,function(item){if(!item.isLeaf()&&item.isSelected()){vm.setSelected(item,false);}});};/**
 		   * Get model as items because it could be ssaved as id
-		   */vm.getModelAsItems=function(){if(vm.modelAsId){return _.map(vm.ngModel.$viewValue,function(id){return vm.itemsIndex[id].getItem();});}else{return vm.ngModel.$viewValue;}};/**
+		   */vm.getModelAsItems=function(){if(vm.modelAsId){return _(vm.ngModel.$viewValue).map(function(id){// Can' guarantee the item still exists unless restrict model is on
+	return _.invoke(vm.itemsIndex[id],'getItem');}).compact().value();}else{return vm.ngModel.$viewValue;}};/**
 		   * Add item to model and trigger validation
 		   */vm.addToModel=function(item){vm.ngModel.$viewValue.push(vm.modelAsId?item.getId():item.getItem());vm.ngModel.$validate();};/**
 		   * Remove item from model and trigger validation
@@ -42088,7 +42090,7 @@
 	_.forEach(vm.itemsFlat,function(item,index){delete vm.itemsFlat[index];});// Create chooser items, so the underlying model is not touched
 	vm.items=vm.createItems(vm.treeData);// Flatten into a sorted list for easier navigation
 	vm.itemsFlat=vm.flattenItems(vm.items);// Item index
-	vm.itemsIndex=_.keyBy(vm.itemsFlat,function(item){return item.getId();});vm.syncModelToItems();},true);/**
+	vm.itemsIndex=_.keyBy(vm.itemsFlat,function(item){return item.getId();});vm.syncModelToItems();});/**
 		   * Sync on restrict model
 		   */$scope.$watch('vm.restrictModel',function(value){if(value){vm.syncModelToItems();}});/**
 		   * Clear on multiselect false
@@ -51541,7 +51543,7 @@
 	(freeModule.exports=_)._=_;// Export for CommonJS support.
 	freeExports._=_;}else{// Export to the global object.
 	root._=_;}}).call(this);/* WEBPACK VAR INJECTION */}).call(exports,function(){return this;}(),__webpack_require__(11)(module));/***/},/* 11 *//***/function(module,exports){module.exports=function(module){if(!module.webpackPolyfill){module.deprecate=function(){};module.paths=[];// module.parent = undefined by default
-	module.children=[];module.webpackPolyfill=1;}return module;};/***/},/* 12 *//***/function(module,exports,__webpack_require__){'use strict';module.exports=function(treeChooser){treeChooser.directive('treeChooserItem',__webpack_require__(13)).controller('treeChooserItemController',__webpack_require__(15)).factory('TreeChooserItem',__webpack_require__(16));};/***/},/* 13 *//***/function(module,exports,__webpack_require__){'use strict';function TreeChooserItem(){return{bindToController:true,controller:'treeChooserItemController',controllerAs:'vm',require:'^treeChooser',scope:{item:'=treeChooserItem'},template:__webpack_require__(14)};}module.exports=TreeChooserItem;/***/},/* 14 *//***/function(module,exports){module.exports="<span class=treeChooser-item ng-mouseover=\"vm.chooserVm.clearActive(); vm.item.setActive(true)\" ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";/***/},/* 15 *//***/function(module,exports){'use strict';/*@ngInject*/TreeChooserItemController.$inject=['$element'];function TreeChooserItemController($element){var vm=this;vm.chooserVm=$element.controller('treeChooser');}module.exports=TreeChooserItemController;/***/},/* 16 *//***/function(module,exports,__webpack_require__){'use strict';function TreeChooserItemFactory(){var _=__webpack_require__(10);function TreeChooserItem(item,parent,properties){var _this=this;this.item=item;// @todo use this for templates
+	module.children=[];module.webpackPolyfill=1;}return module;};/***/},/* 12 *//***/function(module,exports,__webpack_require__){'use strict';module.exports=function(treeChooser){treeChooser.directive('treeChooserItem',__webpack_require__(13)).controller('treeChooserItemController',__webpack_require__(15)).factory('TreeChooserItem',__webpack_require__(16));};/***/},/* 13 *//***/function(module,exports,__webpack_require__){'use strict';function TreeChooserItem(){return{bindToController:true,controller:'treeChooserItemController',controllerAs:'vm',require:'^treeChooser',scope:{item:'=treeChooserItem'},template:__webpack_require__(14)};}module.exports=TreeChooserItem;/***/},/* 14 *//***/function(module,exports){module.exports="<span class=treeChooser-item ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";/***/},/* 15 *//***/function(module,exports){'use strict';/*@ngInject*/TreeChooserItemController.$inject=['$element'];function TreeChooserItemController($element){var vm=this;vm.chooserVm=$element.controller('treeChooser');}module.exports=TreeChooserItemController;/***/},/* 16 *//***/function(module,exports,__webpack_require__){'use strict';function TreeChooserItemFactory(){var _=__webpack_require__(10);function TreeChooserItem(item,parent,properties){var _this=this;this.item=item;// @todo use this for templates
 	this.properties=properties;this.id=_.get(this.item,this.properties.id);this.label=_.get(this.item,this.properties.label);this.parent=parent;this.active=false;this.excluded=false;this.expanded=false;this.selected=false;var children=_.get(item,properties.children);this.children=_.map(children,function(child){return new TreeChooserItem(child,_this,properties);});}TreeChooserItem.prototype.getItem=function(){return this.item;};TreeChooserItem.prototype.getChildren=function(){return this.children;};TreeChooserItem.prototype.hasAChildPresent=function(){return!!_.find(this.getChildren(),function(child){return child.isPresent();});};TreeChooserItem.prototype.getPresentChildren=function(){return _.filter(this.getChildren(),function(child){return child.isPresent();});};TreeChooserItem.prototype.getId=function(){return this.id;};TreeChooserItem.prototype.getLabel=function(){return this.label;};TreeChooserItem.prototype.isActive=function(){return this.active;};TreeChooserItem.prototype.isLeaf=function(){return _.isEmpty(this.children);};TreeChooserItem.prototype.isShowing=function(){return this.isPresent()&&(!this.parent||this.parent.isExpanded());};TreeChooserItem.prototype.isPresent=function(){return!this.excluded;};TreeChooserItem.prototype.isExpanded=function(){return this.expanded;};TreeChooserItem.prototype.isSelected=function(){return this.selected;};TreeChooserItem.prototype.setActive=function(value){this.active=value;};TreeChooserItem.prototype.setExcluded=function(value){this.excluded=value;};TreeChooserItem.prototype.setExpanded=function(value){this.expanded=value;};TreeChooserItem.prototype.setSelected=function(value){this.selected=value;};TreeChooserItem.prototype.toggleExpanded=function(){this.expanded=!this.expanded;};return TreeChooserItem;}module.exports=TreeChooserItemFactory;/***/}/******/]);//# sourceMappingURL=tree-chooser.js.map
 
 /***/ },
@@ -51579,7 +51581,7 @@
 	
 	
 	// module
-	exports.push([module.id, ".treeChooser{position:relative}.treeChooser-input{border:1px solid #000}.treeChooser-input span{border:1px solid #000;border-radius:5px;display:inline-block;margin:5px 0 0 5px;padding:2px 4px}.treeChooser-input span:hover{background-color:#11c1f3}.treeChooser-input input{margin:5px;border:none;outline:none;width:calc(100% - 10px)}.treeChooser ul{padding-left:10px;list-style:none}.treeChooser>ul{background:#fff;border:1px solid #666;padding:5px;position:absolute;left:0;width:300px;max-height:200px;overflow:auto}.treeChooser-selected>.treeChooser-label{color:#0a9dc7;font-weight:700}.treeChooser-active>.treeChooser-label{font-style:italic;font-weight:700}.treeChooser-disabled{color:#9e9e9e}.treeChooser-expansion{display:inline-block;width:10px}.treeChooser-expanded{content:\"-\"}.treeChooser-collapsed{content:\"+\"}\n/*# sourceMappingURL=tree-chooser.css.map*/", ""]);
+	exports.push([module.id, ".treeChooser{position:relative}.treeChooser-input-focused{outline:5px auto -webkit-focus-ring-color}.treeChooser-input{border:1px solid #000}.treeChooser-input span{border:1px solid #000;border-radius:5px;display:inline-block;margin:5px 0 0 5px;padding:2px 4px}.treeChooser-input span:hover{background-color:#11c1f3}.treeChooser-input input{margin:5px;border:none;outline:none;width:calc(100% - 10px)}.treeChooser ul{padding-left:10px;list-style:none}.treeChooser>ul{background:#fff;border:1px solid #666;padding:5px;margin-top:4px;position:absolute;left:0;width:300px;max-height:200px;overflow:auto}.treeChooser-item{display:inline-block;width:100%}.treeChooser-label{border-radius:5px;display:inline-block;padding:1px 3px}.treeChooser-label:hover{background-color:#ecf0f1}.treeChooser-selected>.treeChooser-label{color:#0a9dc7;font-weight:700}.treeChooser-active>.treeChooser-label{font-style:italic;font-weight:700}.treeChooser-disabled{color:#9e9e9e}.treeChooser-expansion{display:inline-block;width:10px}.treeChooser-expanded{content:\"-\"}.treeChooser-collapsed{content:\"+\"}\n/*# sourceMappingURL=tree-chooser.css.map*/", ""]);
 	
 	// exports
 
