@@ -8,8 +8,13 @@ A simple Tree Chooser for Angular
 See [here](http://randdusing.com/tree-chooser/).
 
 ## Todo
-- Allow better templating for pills and list
-- Improve dropdown styles (auto positioning, auto width, etc)
+- Use options object
+- Allow templates for pills and list
+- Improve default pill styles
+- Auto set active best match
+- Select on tab out
+- Ensure ng-model-options works
+- Disable open on click
 - Create example / documentation website
 - Add test coverage
 - Improve styles
