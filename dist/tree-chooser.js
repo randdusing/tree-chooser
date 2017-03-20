@@ -190,32 +190,39 @@
 	    },
 	    template: __webpack_require__(8),
 	    link: function link(scope, element) {
-	      // @todo clean up query selectors to not rely on classes
 	      var input = angular.element(element[0].querySelector('.treeChooser-input input'));
 	      input.on('click', function (event) {
 	        event.stopPropagation();
 	      });
+	
 	      var list = angular.element(element[0].querySelector('.treeChooser-list'));
 	      list.on('click', function (event) {
 	        event.stopPropagation();
 	      });
+	
 	      scope.focusInput = function () {
 	        $timeout(function () {
 	          input[0].focus();
 	        });
 	      };
+	
 	      scope.focusList = function () {
 	        $timeout(function () {
 	          list[0].focus();
 	        });
 	      };
-	      scope.getListOffset = function () {
-	        return input[0].parentNode.offsetHeight + 'px';
+	
+	      scope.getListStyles = function () {
+	        return {
+	          top: input[0].parentNode.offsetHeight + 'px',
+	          width: input[0].parentNode.offsetWidth + 'px'
+	        };
 	      };
+	
 	      scope.scrollActive = function () {
 	        $timeout(function () {
-	          var active = element[0].querySelector('.treeChooser-active');
-	          list[0].scrollTop = active.offsetTop - 12; // @todo this should be about font size
+	          var active = element[0].querySelector('.treeChooser-active .treeChooser-label');
+	          list[0].scrollTop = active.offsetTop;
 	        });
 	      };
 	    }
@@ -237,7 +244,7 @@
 /* 8 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=treeChooser> <div class=treeChooser-input> <span ng-if=vm.enablePills ng-click=vm.removeFromModel(item) ng-repeat=\"item in vm.getModelAsItems()\"> {{item.label}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=\"{'top': getListOffset()}\" class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";
+	module.exports = "<div class=treeChooser> <div class=treeChooser-input ng-class=\"{'treeChooser-input-focused': vm.focused}\"> <span ng-if=vm.enablePills ng-click=\"vm.removeFromModel(item); focusInput()\" ng-repeat=\"item in vm.getModelAsItems()\"> {{item[vm.properties.label]}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) ng-focus=\"vm.focused = true\" ng-blur=\"vm.focused = false\" placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=getListStyles() class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";
 
 /***/ },
 /* 9 */
@@ -266,6 +273,7 @@
 	    label: vm.labelProperty || 'label',
 	    children: vm.childrenProperty || 'children'
 	  };
+	  vm.properties = properties;
 	
 	  // Enable multiselect by default
 	  if (_.isUndefined(vm.multiselect)) {
@@ -322,6 +330,8 @@
 	
 	    vm.shown = true;
 	
+	    vm.next();
+	
 	    // Add event listener to determine when user clicks outside of tree chooser
 	    $window.addEventListener('click', vm.closeFromClick);
 	  };
@@ -330,6 +340,7 @@
 	   * Close the search results, remove outside click handler
 	   */
 	  vm.close = function () {
+	    vm.reset();
 	    vm.shown = false;
 	    $window.removeEventListener('click', vm.closeFromClick);
 	  };
@@ -343,6 +354,16 @@
 	  };
 	
 	  /**
+	   * Reset the collapsed and active state
+	   */
+	  vm.reset = function () {
+	    _.forEach(vm.itemsFlat, function (item) {
+	      item.setActive(false);
+	      item.setExpanded(false);
+	    });
+	  };
+	
+	  /**
 	   * Handle results keyboard navigation
 	   * @param {Object} $event
 	   */
@@ -353,14 +374,14 @@
 	      case 27:
 	        //Escape
 	        shouldStop = true;
-	        vm.close(true);
+	        vm.close();
 	        $scope.focusInput();
 	        break;
 	      case 13:
 	        //Enter
 	        shouldStop = true;
 	        vm.toggleSelectedActive();
-	        vm.close(true);
+	        vm.close();
 	        $scope.focusInput();
 	        break;
 	      case 40:
@@ -390,7 +411,7 @@
 	        break;
 	      case 9:
 	        //Tab
-	        vm.close(true);
+	        vm.close();
 	        break;
 	    }
 	
@@ -408,11 +429,15 @@
 	    switch ($event.keyCode) {
 	      case 27:
 	        //Escape
-	        vm.close(true);
+	        vm.close();
 	        break;
 	      case 13:
 	        //Enter
-	        vm.show($event);
+	        if (vm.shown) {
+	          vm.toggleSelectedActive();
+	        } else {
+	          vm.show($event);
+	        }
 	        break;
 	      case 40:
 	        //Down Arrow
@@ -421,9 +446,13 @@
 	        break;
 	      case 8:
 	        //Backspace
-	        if (!_.isEmpty(vm.ngModel.$viewValue)) {
+	        if (_.isEmpty(vm.filterText) && !_.isEmpty(vm.ngModel.$viewValue)) {
 	          vm.ngModel.$viewValue.pop();
 	        }
+	        break;
+	      case 9:
+	        //Tab
+	        vm.close();
 	        break;
 	    }
 	  };
@@ -675,9 +704,10 @@
 	   */
 	  vm.getModelAsItems = function () {
 	    if (vm.modelAsId) {
-	      return _.map(vm.ngModel.$viewValue, function (id) {
-	        return vm.itemsIndex[id].getItem();
-	      });
+	      return _(vm.ngModel.$viewValue).map(function (id) {
+	        // Can' guarantee the item still exists unless restrict model is on
+	        return _.invoke(vm.itemsIndex[id], 'getItem');
+	      }).compact().value();
 	    } else {
 	      return vm.ngModel.$viewValue;
 	    }
@@ -792,7 +822,7 @@
 	    });
 	
 	    vm.syncModelToItems();
-	  }, true);
+	  });
 	
 	  /**
 	   * Sync on restrict model
@@ -17975,7 +18005,7 @@
 /* 14 */
 /***/ function(module, exports) {
 
-	module.exports = "<span class=treeChooser-item ng-mouseover=\"vm.chooserVm.clearActive(); vm.item.setActive(true)\" ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";
+	module.exports = "<span class=treeChooser-item ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";
 
 /***/ },
 /* 15 */
