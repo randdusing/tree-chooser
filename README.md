@@ -8,6 +8,7 @@ A simple Tree Chooser for Angular
 See [here](http://randdusing.com/tree-chooser/).
 
 ## Todo
+- Reset scroll on open
 - Use options object
 - Allow templates for pills and list
 - Improve default pill styles
