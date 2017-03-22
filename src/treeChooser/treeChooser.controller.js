@@ -14,12 +14,11 @@ function TreeChooserController(
   vm.shown = false;
 
   // Properties use to access special parts of item
-  var properties = {
+  vm.properties = {
     id: vm.idProperty || 'id',
     label: vm.labelProperty || 'label',
     children: vm.childrenProperty || 'children'
   };
-  vm.properties = properties;
 
   // Enable multiselect by default
   if (_.isUndefined(vm.multiselect)) {
@@ -56,7 +55,7 @@ function TreeChooserController(
   // Default filter node function
   if (!_.isFunction(vm.filterNode)) {
     vm.filterNode = function (item, filterText) {
-      return _.includes(_.toLower(_.get(item, properties.label)), _.toLower(filterText));
+      return _.includes(_.toLower(_.get(item, vm.properties.label)), _.toLower(filterText));
     };
   }
   // Default disable node function
@@ -507,7 +506,7 @@ function TreeChooserController(
    */
   vm.createItems = function (items) {
     return _.map(items, function (item) {
-      return new TreeChooserItem(item, null, properties);
+      return new TreeChooserItem(item, null, vm.properties);
     });
   };
 
