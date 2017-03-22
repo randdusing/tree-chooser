@@ -10,66 +10,6 @@ function TreeChooserController(
   var vm = this,
     _ = require('lodash');
 
-  // Flag to determine whether search results are showing
-  vm.shown = false;
-
-  // Properties use to access special parts of item
-  vm.properties = {
-    id: vm.idProperty || 'id',
-    label: vm.labelProperty || 'label',
-    children: vm.childrenProperty || 'children'
-  };
-
-  // Enable multiselect by default
-  if (_.isUndefined(vm.multiselect)) {
-    vm.multiselect = true;
-  }
-  // Disable only leaves by default
-  if (_.isUndefined(vm.onlyLeaves)) {
-    vm.onlyLeaves = false;
-  }
-  // Disable selects children by default
-  if (_.isUndefined(vm.selectsChildren)) {
-    vm.selectsChildren = false;
-  }
-  // Disable deselects children by default
-  if (_.isUndefined(vm.deselectsChildren)) {
-    vm.deselectsChildren = false;
-  }
-  // Disable restrict model by default
-  if (_.isUndefined(vm.restrictModel)) {
-    vm.restrictModel = false;
-  }
-  // Enable pills by default
-  if (_.isUndefined(vm.enablePills)) {
-    vm.enablePills = true;
-  }
-  // Save ID to model by default
-  if (_.isUndefined(vm.modelAsId)) {
-    vm.modelAsId = true;
-  }
-  // Auto show after specified filter text length
-  if (!_.isNumber(vm.filterAutoShowLength)) {
-    vm.filterAutoShowLength = 2;
-  }
-  // Default filter node function
-  if (!_.isFunction(vm.filterNode)) {
-    vm.filterNode = function (item, filterText) {
-      return _.includes(_.toLower(_.get(item, vm.properties.label)), _.toLower(filterText));
-    };
-  }
-  // Default disable node function
-  if (!_.isFunction(vm.disableNode)) {
-    vm.disableNode = _.stubFalse;
-  }
-
-  // Get access to ngModel
-  vm.ngModel = $element.controller('ngModel');
-  // And override $isEmpty to account for array emptiness if multiselect
-  if (vm.multiselect) {
-    vm.ngModel.$isEmpty = _.isEmpty;
-  }
-
   // @todo create a separate directive for the list
 
   /**
@@ -522,70 +462,136 @@ function TreeChooserController(
       .value();
   };
 
-  /**
-   * Update exclusions on filter text change
-   */
-  $scope.$watch('vm.filterText', function () {
-    vm.setExclusions(vm.items);
-    if (_.size(vm.filterText) === vm.filterAutoShowLength) {
-      vm.showAll();
+  this.$onInit = function () {
+    // Flag to determine whether search results are showing
+    vm.shown = false;
+
+    // Properties use to access special parts of item
+    vm.properties = {
+      id: vm.idProperty || 'id',
+      label: vm.labelProperty || 'label',
+      children: vm.childrenProperty || 'children'
+    };
+
+    // Enable multiselect by default
+    if (_.isUndefined(vm.multiselect)) {
+      vm.multiselect = true;
     }
-  });
+    // Disable only leaves by default
+    if (_.isUndefined(vm.onlyLeaves)) {
+      vm.onlyLeaves = false;
+    }
+    // Disable selects children by default
+    if (_.isUndefined(vm.selectsChildren)) {
+      vm.selectsChildren = false;
+    }
+    // Disable deselects children by default
+    if (_.isUndefined(vm.deselectsChildren)) {
+      vm.deselectsChildren = false;
+    }
+    // Disable restrict model by default
+    if (_.isUndefined(vm.restrictModel)) {
+      vm.restrictModel = false;
+    }
+    // Enable pills by default
+    if (_.isUndefined(vm.enablePills)) {
+      vm.enablePills = true;
+    }
+    // Save ID to model by default
+    if (_.isUndefined(vm.modelAsId)) {
+      vm.modelAsId = true;
+    }
+    // Auto show after specified filter text length
+    if (!_.isNumber(vm.filterAutoShowLength)) {
+      vm.filterAutoShowLength = 2;
+    }
+    // Default filter node function
+    if (!_.isFunction(vm.filterNode)) {
+      vm.filterNode = function (item, filterText) {
+        return _.includes(_.toLower(_.get(item, vm.properties.label)), _.toLower(filterText));
+      };
+    }
+    // Default disable node function
+    if (!_.isFunction(vm.disableNode)) {
+      vm.disableNode = _.stubFalse;
+    }
 
-  /**
-   * Sync on model change
-   */
-  $scope.$watchCollection('vm.ngModel.$modelValue', function () {
-    vm.syncModelToItems();
-  });
+    // Get access to ngModel
+    vm.ngModel = $element.controller('ngModel');
+    // And override $isEmpty to account for array emptiness if multiselect
+    if (vm.multiselect) {
+      vm.ngModel.$isEmpty = _.isEmpty;
+    }
 
-  /**
-   * Sync on items change
-   */
-  $scope.$watch('vm.treeData', function () {
-    // @todo is this manual GC needed?
-    _.forEach(vm.itemsFlat, function (item, index) {
-      delete vm.itemsFlat[index];
+    this.registerWatches();
+  };
+
+  this.registerWatches = function () {
+    /**
+     * Update exclusions on filter text change
+     */
+    $scope.$watch('vm.filterText', function () {
+      vm.setExclusions(vm.items);
+      if (_.size(vm.filterText) === vm.filterAutoShowLength) {
+        vm.showAll();
+      }
     });
 
-    // Create chooser items, so the underlying model is not touched
-    vm.items = vm.createItems(vm.treeData);
-    // Flatten into a sorted list for easier navigation
-    vm.itemsFlat = vm.flattenItems(vm.items);
-    // Item index
-    vm.itemsIndex = _.keyBy(vm.itemsFlat, function (item) {
-      return item.getId();
-    });
-
-    vm.syncModelToItems();
-  });
-
-  /**
-   * Sync on restrict model
-   */
-  $scope.$watch('vm.restrictModel', function (value) {
-    if (value) {
+    /**
+     * Sync on model change
+     */
+    $scope.$watchCollection('vm.ngModel.$modelValue', function () {
       vm.syncModelToItems();
-    }
-  });
+    });
 
-  /**
-   * Deselect branches on only leaves true
-   */
-  $scope.$watch('vm.onlyLeaves', function (value) {
-    if (value) {
-      vm.clearBranches();
-    }
-  });
+    /**
+     * Sync on items change
+     */
+    $scope.$watch('vm.treeData', function () {
+      // @todo is this manual GC needed?
+      _.forEach(vm.itemsFlat, function (item, index) {
+        delete vm.itemsFlat[index];
+      });
 
-  /**
-   * Disable results on disable
-   */
-  $scope.$watch('vm.ngDisabled', function (value) {
-    if (value) {
-      vm.close();
-    }
-  });
+      // Create chooser items, so the underlying model is not touched
+      vm.items = vm.createItems(vm.treeData);
+      // Flatten into a sorted list for easier navigation
+      vm.itemsFlat = vm.flattenItems(vm.items);
+      // Item index
+      vm.itemsIndex = _.keyBy(vm.itemsFlat, function (item) {
+        return item.getId();
+      });
+
+      vm.syncModelToItems();
+    });
+
+    /**
+     * Sync on restrict model
+     */
+    $scope.$watch('vm.restrictModel', function (value) {
+      if (value) {
+        vm.syncModelToItems();
+      }
+    });
+
+    /**
+     * Deselect branches on only leaves true
+     */
+    $scope.$watch('vm.onlyLeaves', function (value) {
+      if (value) {
+        vm.clearBranches();
+      }
+    });
+
+    /**
+     * Disable results on disable
+     */
+    $scope.$watch('vm.ngDisabled', function (value) {
+      if (value) {
+        vm.close();
+      }
+    });
+  };
 }
 
 module.exports = TreeChooserController;
