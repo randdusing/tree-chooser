@@ -1,6 +1,9 @@
 # tree-chooser
 A simple Tree Chooser for Angular
 
+## Requirements
+Angular must be at least version 1.5.0
+
 ## Installation
 ``` npm install tree-chooser --save ```
 
