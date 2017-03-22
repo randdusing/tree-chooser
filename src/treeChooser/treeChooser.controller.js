@@ -13,11 +13,6 @@ function TreeChooserController(
   // Flag to determine whether search results are showing
   vm.shown = false;
 
-  // Get access to ngModel
-  vm.ngModel = $element.controller('ngModel');
-  // And override $isEmpty to account for array emptiness
-  vm.ngModel.$isEmpty = _.isEmpty;
-
   // Properties use to access special parts of item
   var properties = {
     id: vm.idProperty || 'id',
@@ -67,6 +62,13 @@ function TreeChooserController(
   // Default disable node function
   if (!_.isFunction(vm.disableNode)) {
     vm.disableNode = _.stubFalse;
+  }
+
+  // Get access to ngModel
+  vm.ngModel = $element.controller('ngModel');
+  // And override $isEmpty to account for array emptiness if multiselect
+  if (vm.multiselect) {
+    vm.ngModel.$isEmpty = _.isEmpty;
   }
 
   // @todo create a separate directive for the list
@@ -185,8 +187,8 @@ function TreeChooserController(
         $scope.focusList();
         break;
       case 8: //Backspace
-        if (_.isEmpty(vm.filterText) && !_.isEmpty(vm.ngModel.$viewValue)) {
-          vm.ngModel.$viewValue.pop();
+        if (_.isEmpty(vm.filterText) && (vm.multiselect ? !_.isEmpty(vm.ngModel.$viewValue) : !_.isNil(vm.ngModel.$viewValue))) {
+          vm.removeFromModel();
         }
         break;
       case 9: //Tab
@@ -356,17 +358,13 @@ function TreeChooserController(
     }
     item.setSelected(value);
     if (value) {
-      // Enforce multiselect restrictions
-      if (!vm.multiselect) {
-        vm.clearModel();
-      }
       vm.addToModel(item);
-      if (vm.selectsChildren) {
+      if (vm.selectsChildren && vm.multiselect) {
         vm.selectChildren(item);
       }
     } else {
       vm.removeFromModel(item.getItem());
-      if (vm.deselectsChildren) {
+      if (vm.deselectsChildren && vm.multiselect) {
         vm.deselectChildren(item);
       }
     }
@@ -418,16 +416,6 @@ function TreeChooserController(
   };
 
   /**
-   * If multiple not allowed, remove all but last entry
-   */
-  vm.clearMulti = function () {
-    var length = vm.ngModel.$viewValue.length - 1;
-    _.remove(vm.ngModel.$viewValue, function (item, index) {
-      return index < length;
-    });
-  };
-
-  /**
    * Clear all no leaves
    * @todo if deselect Children is enabled, won't this deselect leaves?
    */
@@ -443,44 +431,45 @@ function TreeChooserController(
    * Get model as items because it could be ssaved as id
    */
   vm.getModelAsItems = function () {
-    if (vm.modelAsId) {
-      return _(vm.ngModel.$viewValue)
-        .map(function (id) {
-          // Can' guarantee the item still exists unless restrict model is on
-          return _.invoke(vm.itemsIndex[id], 'getItem');
-        })
-        .compact()
-        .value();
-    } else {
-      return vm.ngModel.$viewValue;
-    }
+    return _(vm.multiselect ? vm.ngModel.$viewValue : [vm.ngModel.$viewValue])
+      .map(function (item) {
+        // Can' guarantee the item still exists unless restrict model is on
+        return vm.modelAsId ? _.invoke(vm.itemsIndex[item], 'getItem') : item;
+      })
+      .compact()
+      .value();
   };
 
   /**
    * Add item to model and trigger validation
    */
   vm.addToModel = function (item) {
-    vm.ngModel.$viewValue.push(vm.modelAsId ? item.getId() : item.getItem());
-    vm.ngModel.$validate();
+    var value = vm.modelAsId ? item.getId() : item.getItem();
+    if (vm.multiselect) {
+      vm.ngModel.$viewValue.push(value);
+      vm.ngModel.$validate();
+    } else {
+      vm.ngModel.$setViewValue(value);
+    }
   };
 
   /**
    * Remove item from model and trigger validation
    */
   vm.removeFromModel = function (item) {
-    var id = _.get(item, properties.id);
-    _.remove(vm.ngModel.$viewValue, function (item) {
-      return vm.modelAsId ? item === id : _.get(item, properties.id) === id;
-    });
-    vm.ngModel.$validate();
-  };
-
-  /**
-   * Remove all items from model
-   */
-  vm.clearModel = function () {
-    _.remove(vm.ngModel.$viewValue, _.returnTrue);
-    vm.ngModel.$validate();
+    if (!vm.multiselect) {
+      vm.ngModel.$setViewValue(null);
+    } else {
+      if (item) {
+        var id = _.get(item, vm.properties.id);
+        _.remove(vm.ngModel.$viewValue, function (item) {
+          return vm.modelAsId ? item === id : _.get(item, vm.properties.id) === id;
+        });
+      } else {
+        vm.ngModel.$viewValue.pop();
+      }
+      vm.ngModel.$validate();
+    }
   };
 
   /**
@@ -491,10 +480,12 @@ function TreeChooserController(
       item.setSelected(false);
     });
 
+    var model = vm.multiselect ? vm.ngModel.$modelValue : [vm.ngModel.$modelValue];
+
     var toDelete = [];
     // Set selected items back to true
-    _.forEach(vm.ngModel.$modelValue, function (item) {
-      var id = vm.modelAsId ? item : _.get(item, properties.id);
+    _.forEach(model, function (item) {
+      var id = vm.modelAsId ? item : _.get(item, vm.properties.id);
       var checkItem = vm.itemsIndex[id];
       if (checkItem) {
         checkItem.setSelected(true);
@@ -576,15 +567,6 @@ function TreeChooserController(
   $scope.$watch('vm.restrictModel', function (value) {
     if (value) {
       vm.syncModelToItems();
-    }
-  });
-
-  /**
-   * Clear on multiselect false
-   */
-  $scope.$watch('vm.multiselect', function (value) {
-    if (!value) {
-      vm.clearMulti();
     }
   });
 
