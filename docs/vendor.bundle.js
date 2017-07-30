@@ -41255,7 +41255,8 @@
 		       */enablePills:'=?',/**
 		       * Just use the ID as the model value?
 		       * @type {boolean}
-		       */modelAsId:'=?'},template:__webpack_require__(8),link:function link(scope,element){var input=angular.element(element[0].querySelector('.treeChooser-input input'));input.on('click',function(event){event.stopPropagation();});var list=angular.element(element[0].querySelector('.treeChooser-list'));list.on('click',function(event){event.stopPropagation();});scope.focusInput=function(){$timeout(function(){input[0].focus();});};scope.focusList=function(){$timeout(function(){list[0].focus();});};scope.getListStyles=function(){return{top:input[0].parentNode.offsetHeight+'px',width:input[0].parentNode.offsetWidth+'px'};};scope.scrollActive=function(){$timeout(function(){var active=element[0].querySelector('.treeChooser-active .treeChooser-label');list[0].scrollTop=active.offsetTop;});};}};}module.exports=TreeChooser;/***/},/* 4 *//***/function(module,exports){// removed by extract-text-webpack-plugin
+		       */modelAsId:'=?'},template:__webpack_require__(8),link:function link(scope,element){var input=angular.element(element[0].querySelector('.treeChooser-input input'));input.on('click',function(event){event.stopPropagation();});var list=angular.element(element[0].querySelector('.treeChooser-list'));list.on('click',function(event){event.stopPropagation();});scope.focusInput=function(){$timeout(function(){input[0].focus();});};scope.focusList=function(){$timeout(function(){list[0].focus();});};scope.getListStyles=function(){return{top:input[0].parentNode.offsetHeight+'px',width:input[0].parentNode.offsetWidth+'px'};};scope.scrollActive=function(){$timeout(function(){var active=element[0].querySelector('.treeChooser-active .treeChooser-label');// If no results are shown, there won't be an active!
+	if(active){list[0].scrollTop=active.offsetTop;}});};}};}module.exports=TreeChooser;/***/},/* 4 *//***/function(module,exports){// removed by extract-text-webpack-plugin
 	/***/},,,,/* 5 *//* 6 *//* 7 *//* 8 *//***/function(module,exports){module.exports="<div class=treeChooser> <div class=treeChooser-input ng-class=\"{'treeChooser-input-focused': vm.focused}\"> <span ng-if=vm.enablePills ng-click=\"vm.removeFromModel(item); focusInput()\" ng-repeat=\"item in vm.getModelAsItems()\"> {{item[vm.properties.label]}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) ng-focus=\"vm.focused = true\" ng-blur=\"vm.focused = false\" placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=getListStyles() class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";/***/},/* 9 *//***/function(module,exports,__webpack_require__){'use strict';/*@ngInject*/TreeChooserController.$inject=['$element','$scope','$window','TreeChooserItem'];function TreeChooserController($element,$scope,$window,TreeChooserItem){var vm=this,_=__webpack_require__(10);// @todo create a separate directive for the list
 	/**
 		   * Show the search results, add outside click handler
@@ -41287,10 +41288,12 @@
 	if(_.isEmpty(vm.filterText)&&(vm.multiselect?!_.isEmpty(vm.ngModel.$viewValue):!_.isNil(vm.ngModel.$viewValue))){vm.removeFromModel();}break;case 9://Tab
 	vm.close();break;}};/**
 		   * Find next visible item
-		   */vm.next=function(){var active=vm.findActive();if(!active){var first=_.find(vm.itemsFlat,function(item){return item.isShowing();});first.setActive(true);}else{var start=_.findIndex(vm.itemsFlat,function(item){return item.isActive();});active.setActive(false);// @todo optimize array traversal
+		   */vm.next=function(){if(_.isEmpty(vm.itemsFlat)){return;}var active=vm.findActive();if(!active){var first=_.find(vm.itemsFlat,function(item){return item.isShowing();});// If no results are shown, there's nothing to set first!
+	if(first){first.setActive(true);}}else{var start=_.findIndex(vm.itemsFlat,function(item){return item.isActive();});active.setActive(false);// @todo optimize array traversal
 	var next=_.find(vm.itemsFlat,function(item,index){return index>start&&item.isShowing();});if(!next){next=_.find(vm.itemsFlat,function(item,index){return index<start&&item.isShowing();});}if(next){next.setActive(true);}}$scope.scrollActive();};/**
 		   * Find previous visible item
-		   */vm.prev=function(){var active=vm.findActive();if(!active){var last=_.findLast(vm.itemsFlat,function(item){return item.isShowing();});last.setActive(true);}else{var start=_.findIndex(vm.itemsFlat,function(item){return item.isActive();});active.setActive(false);// @todo optimize array traversal
+		   */vm.prev=function(){var active=vm.findActive();if(!active){var last=_.findLast(vm.itemsFlat,function(item){return item.isShowing();});// If no results are shown, there's nothing to set last!
+	if(last){last.setActive(true);}}else{var start=_.findIndex(vm.itemsFlat,function(item){return item.isActive();});active.setActive(false);// @todo optimize array traversal
 	var prev=_.findLast(vm.itemsFlat,function(item,index){return index<start&&item.isShowing();});if(!prev){prev=_.findLast(vm.itemsFlat,function(item,index){return index>start&&item.isShowing();});}if(prev){prev.setActive(true);}}$scope.scrollActive();};/**
 		   * Expand active item
 		   */vm.expandActive=function(){var active=vm.findActive();if(active){active.setExpanded(true);}};/**
@@ -41303,7 +41306,7 @@
 		   * Get the active item
 		   */vm.findActive=function(){return _.find(vm.itemsFlat,function(item){return item.isActive();});};/**
 		   * Toggle selected unless disabled
-		   */vm.toggleSelected=function(item){if(vm.disableNode(item)){return;}vm.setSelected(item,!item.isSelected());};/**
+		   */vm.toggleSelected=function(item){if(vm.disableNode(item)){return;}vm.setSelected(item,!item.isSelected());if(item.isSelected()&&!vm.multiselect){vm.close();}};/**
 		   * Select all unfiltered children
 		   */vm.selectChildren=function(item){_.forEach(item.getPresentChildren(),function(child){if(!child.isSelected()){vm.setSelected(child,true);}vm.selectChildren(child);});};/**
 		   * Deselect all children
