@@ -1,3 +1,7 @@
+## 0.0.7 - 2017-07-30
+- Bugfix: Handle empty options (don't throw errors)
+- Automatically close options on single select
+
 ## 0.0.6 - 2017-03-21
 - Add single select support
 - Fix issue with $onInit timing

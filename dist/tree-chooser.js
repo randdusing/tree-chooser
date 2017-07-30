@@ -402,6 +402,10 @@
 	   * Find next visible item
 	   */
 	  vm.next = function () {
+	    if (_.isEmpty(vm.itemsFlat)) {
+	      return;
+	    }
+	
 	    var active = vm.findActive();
 	
 	    if (!active) {
@@ -523,6 +527,9 @@
 	    }
 	
 	    vm.setSelected(item, !item.isSelected());
+	    if (item.isSelected() && !vm.multiselect) {
+	      vm.close();
+	    }
 	  };
 	
 	  /**
