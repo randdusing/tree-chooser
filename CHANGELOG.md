@@ -1,3 +1,7 @@
+## 0.0.6 - 2017-03-21
+- Add single select support
+- Fix issue with $onInit timing
+
 ## 0.0.5 - 2017-03-18
 - Bugfix: when treeData changes and model points to old treeData
 - Bugfix: backspace only deletes model values when text is empty
