@@ -222,7 +222,10 @@
 	      scope.scrollActive = function () {
 	        $timeout(function () {
 	          var active = element[0].querySelector('.treeChooser-active .treeChooser-label');
-	          list[0].scrollTop = active.offsetTop;
+	          // If no results are shown, there won't be an active!
+	          if (active) {
+	            list[0].scrollTop = active.offsetTop;
+	          }
 	        });
 	      };
 	    }
@@ -412,7 +415,10 @@
 	      var first = _.find(vm.itemsFlat, function (item) {
 	        return item.isShowing();
 	      });
-	      first.setActive(true);
+	      // If no results are shown, there's nothing to set first!
+	      if (first) {
+	        first.setActive(true);
+	      }
 	    } else {
 	      var start = _.findIndex(vm.itemsFlat, function (item) {
 	        return item.isActive();
@@ -446,7 +452,10 @@
 	      var last = _.findLast(vm.itemsFlat, function (item) {
 	        return item.isShowing();
 	      });
-	      last.setActive(true);
+	      // If no results are shown, there's nothing to set last!
+	      if (last) {
+	        last.setActive(true);
+	      }
 	    } else {
 	      var start = _.findIndex(vm.itemsFlat, function (item) {
 	        return item.isActive();

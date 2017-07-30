@@ -1,3 +1,6 @@
+## 0.0.8 - 2017-07-30
+- Bugfix: Handle empty filtered options
+
 ## 0.0.7 - 2017-07-30
 - Bugfix: Handle empty options (don't throw errors)
 - Automatically close options on single select

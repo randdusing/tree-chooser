@@ -143,7 +143,10 @@ function TreeChooser($timeout) {
       scope.scrollActive = function () {
         $timeout(function () {
           var active = element[0].querySelector('.treeChooser-active .treeChooser-label');
-          list[0].scrollTop = active.offsetTop;
+          // If no results are shown, there won't be an active!
+          if (active) {
+            list[0].scrollTop = active.offsetTop;
+          }
         });
       };
     }

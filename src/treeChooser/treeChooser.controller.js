@@ -150,7 +150,10 @@ function TreeChooserController(
       var first = _.find(vm.itemsFlat, function (item) {
         return item.isShowing();
       });
-      first.setActive(true);
+      // If no results are shown, there's nothing to set first!
+      if (first) {
+        first.setActive(true);
+      }
     } else {
       var start = _.findIndex(vm.itemsFlat, function (item) {
         return item.isActive();
@@ -184,7 +187,10 @@ function TreeChooserController(
       var last = _.findLast(vm.itemsFlat, function (item) {
         return item.isShowing();
       });
-      last.setActive(true);
+      // If no results are shown, there's nothing to set last!
+      if (last) {
+        last.setActive(true);
+      }
     } else {
       var start = _.findIndex(vm.itemsFlat, function (item) {
         return item.isActive();
