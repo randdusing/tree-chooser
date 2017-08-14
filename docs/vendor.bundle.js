@@ -41255,15 +41255,18 @@
 		       */enablePills:'=?',/**
 		       * Just use the ID as the model value?
 		       * @type {boolean}
-		       */modelAsId:'=?'},template:__webpack_require__(8),link:function link(scope,element){var input=angular.element(element[0].querySelector('.treeChooser-input input'));input.on('click',function(event){event.stopPropagation();});var list=angular.element(element[0].querySelector('.treeChooser-list'));list.on('click',function(event){event.stopPropagation();});scope.focusInput=function(){$timeout(function(){input[0].focus();});};scope.focusList=function(){$timeout(function(){list[0].focus();});};scope.getListStyles=function(){return{top:input[0].parentNode.offsetHeight+'px',width:input[0].parentNode.offsetWidth+'px'};};scope.scrollActive=function(){$timeout(function(){var active=element[0].querySelector('.treeChooser-active .treeChooser-label');// If no results are shown, there won't be an active!
+		       */modelAsId:'=?',/**
+		       * Disable outside click to close
+		       * @type {boolean}
+		       */disableClick:'=?'},template:__webpack_require__(8),link:function link(scope,element){var input=angular.element(element[0].querySelector('.treeChooser-input input'));input.on('click',function(event){event.stopPropagation();});var list=angular.element(element[0].querySelector('.treeChooser-list'));list.on('click',function(event){event.stopPropagation();});scope.focusInput=function(){$timeout(function(){input[0].focus();});};scope.focusList=function(){$timeout(function(){list[0].focus();});};scope.getListStyles=function(){return{top:input[0].parentNode.offsetHeight+'px',width:input[0].parentNode.offsetWidth+'px'};};scope.scrollActive=function(){$timeout(function(){var active=element[0].querySelector('.treeChooser-active .treeChooser-label');// If no results are shown, there won't be an active!
 	if(active){list[0].scrollTop=active.offsetTop;}});};}};}module.exports=TreeChooser;/***/},/* 4 *//***/function(module,exports){// removed by extract-text-webpack-plugin
 	/***/},,,,/* 5 *//* 6 *//* 7 *//* 8 *//***/function(module,exports){module.exports="<div class=treeChooser> <div class=treeChooser-input ng-class=\"{'treeChooser-input-focused': vm.focused}\"> <span ng-if=vm.enablePills ng-click=\"vm.removeFromModel(item); focusInput()\" ng-repeat=\"item in vm.getModelAsItems()\"> {{item[vm.properties.label]}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) ng-focus=\"vm.focused = true\" ng-blur=\"vm.focused = false\" placeholder={{vm.ngPlaceholder}} ng-click=vm.show()> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-focus=vm.next() ng-style=getListStyles() class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";/***/},/* 9 *//***/function(module,exports,__webpack_require__){'use strict';/*@ngInject*/TreeChooserController.$inject=['$element','$scope','$window','TreeChooserItem'];function TreeChooserController($element,$scope,$window,TreeChooserItem){var vm=this,_=__webpack_require__(10);// @todo create a separate directive for the list
 	/**
 		   * Show the search results, add outside click handler
 		   */vm.show=function(){if(vm.shown){return;}vm.shown=true;vm.next();// Add event listener to determine when user clicks outside of tree chooser
-	$window.addEventListener('click',vm.closeFromClick);};/**
+	if(!vm.disableClick){$window.addEventListener('click',vm.closeFromClick);}};/**
 		   * Close the search results, remove outside click handler
-		   */vm.close=function(){vm.reset();vm.shown=false;$window.removeEventListener('click',vm.closeFromClick);};/**
+		   */vm.close=function(){vm.reset();vm.shown=false;if(!vm.disableClick){$window.removeEventListener('click',vm.closeFromClick);}};/**
 		   * Close on outside click
 		   */vm.closeFromClick=function(){vm.close();$scope.$apply();};/**
 		   * Reset the collapsed and active state
@@ -41352,7 +41355,8 @@
 	if(_.isUndefined(vm.modelAsId)){vm.modelAsId=true;}// Auto show after specified filter text length
 	if(!_.isNumber(vm.filterAutoShowLength)){vm.filterAutoShowLength=2;}// Default filter node function
 	if(!_.isFunction(vm.filterNode)){vm.filterNode=function(item,filterText){return _.includes(_.toLower(_.get(item,vm.properties.label)),_.toLower(filterText));};}// Default disable node function
-	if(!_.isFunction(vm.disableNode)){vm.disableNode=_.stubFalse;}// Get access to ngModel
+	if(!_.isFunction(vm.disableNode)){vm.disableNode=_.stubFalse;}// Default to enable close to click
+	if(!_.isUndefined(vm.disableClick)){vm.disableClick=false;}// Get access to ngModel
 	vm.ngModel=$element.controller('ngModel');// And override $isEmpty to account for array emptiness if multiselect
 	if(vm.multiselect){vm.ngModel.$isEmpty=_.isEmpty;}this.registerWatches();};this.registerWatches=function(){/**
 		     * Update exclusions on filter text change
