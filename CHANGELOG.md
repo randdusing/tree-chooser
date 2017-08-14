@@ -1,3 +1,6 @@
+## 0.0.9 - 2017-08-13
+- Ability to disable click outside to close
+
 ## 0.0.8 - 2017-07-30
 - Bugfix: Handle empty filtered options
 

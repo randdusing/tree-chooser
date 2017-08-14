@@ -25,7 +25,9 @@ function TreeChooserController(
     vm.next();
 
     // Add event listener to determine when user clicks outside of tree chooser
-    $window.addEventListener('click', vm.closeFromClick);
+    if (!vm.disableClick) {
+      $window.addEventListener('click', vm.closeFromClick);
+    }
   };
 
   /**
@@ -34,7 +36,9 @@ function TreeChooserController(
   vm.close = function () {
     vm.reset();
     vm.shown = false;
-    $window.removeEventListener('click', vm.closeFromClick);
+    if (!vm.disableClick) {
+      $window.removeEventListener('click', vm.closeFromClick);
+    }
   };
 
   /**
@@ -527,6 +531,10 @@ function TreeChooserController(
     // Default disable node function
     if (!_.isFunction(vm.disableNode)) {
       vm.disableNode = _.stubFalse;
+    }
+    // Default to enable close to click
+    if (!_.isUndefined(vm.disableClick)) {
+      vm.disableClick = false;
     }
 
     // Get access to ngModel

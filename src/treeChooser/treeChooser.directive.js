@@ -107,7 +107,13 @@ function TreeChooser($timeout) {
        * Just use the ID as the model value?
        * @type {boolean}
        */
-      modelAsId: '=?'
+      modelAsId: '=?',
+
+      /**
+       * Disable outside click to close
+       * @type {boolean}
+       */
+      disableClick: '=?'
     },
     template: require('./treeChooser.html'),
     link: function (scope, element) {

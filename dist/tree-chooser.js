@@ -186,7 +186,13 @@
 	       * Just use the ID as the model value?
 	       * @type {boolean}
 	       */
-	      modelAsId: '=?'
+	      modelAsId: '=?',
+	
+	      /**
+	       * Disable outside click to close
+	       * @type {boolean}
+	       */
+	      disableClick: '=?'
 	    },
 	    template: __webpack_require__(8),
 	    link: function link(scope, element) {
@@ -277,7 +283,9 @@
 	    vm.next();
 	
 	    // Add event listener to determine when user clicks outside of tree chooser
-	    $window.addEventListener('click', vm.closeFromClick);
+	    if (!vm.disableClick) {
+	      $window.addEventListener('click', vm.closeFromClick);
+	    }
 	  };
 	
 	  /**
@@ -286,7 +294,9 @@
 	  vm.close = function () {
 	    vm.reset();
 	    vm.shown = false;
-	    $window.removeEventListener('click', vm.closeFromClick);
+	    if (!vm.disableClick) {
+	      $window.removeEventListener('click', vm.closeFromClick);
+	    }
 	  };
 	
 	  /**
@@ -784,6 +794,10 @@
 	    // Default disable node function
 	    if (!_.isFunction(vm.disableNode)) {
 	      vm.disableNode = _.stubFalse;
+	    }
+	    // Default to enable close to click
+	    if (!_.isUndefined(vm.disableClick)) {
+	      vm.disableClick = false;
 	    }
 	
 	    // Get access to ngModel
