@@ -141,6 +141,9 @@ function TreeChooserController(
         }
         break;
       case 9: //Tab
+        if (!vm.getPresentItems().length) {
+          vm.filterText = '';
+        }
         vm.close();
         break;
     }
