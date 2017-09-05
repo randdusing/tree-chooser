@@ -26,7 +26,10 @@ function TreeChooserController(
 
     // Add event listener to determine when user clicks outside of tree chooser
     if (!vm.disableClick) {
-      $window.addEventListener('click', vm.closeFromClick);
+      //wrap to $timeout to avoid immediate call because of current click event
+      $timeout(function () {
+        $window.addEventListener('click', vm.closeFromClick);
+      });
     }
   };
 
@@ -46,6 +49,9 @@ function TreeChooserController(
    */
   vm.closeFromClick = function () {
     vm.close();
+    if (vm.selected) {
+      vm.toggleSelected(vm.selected);
+    }
     $scope.$apply();
   };
 
@@ -312,6 +318,7 @@ function TreeChooserController(
     if (value && vm.onlyLeaves && !item.isLeaf()) {
       value = false;
     }
+    vm.selected = item;
     item.setSelected(value);
     if (value) {
       vm.addToModel(item);
