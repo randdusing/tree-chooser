@@ -559,6 +559,15 @@ function TreeChooserController(
 
   this.registerWatches = function () {
     /**
+     * Show tree elements when input focused
+     */
+    $scope.$watch('vm.focused', function () {
+      if (vm.focused) {
+        vm.show();
+      }
+    });
+
+    /**
      * Update exclusions on filter text change
      */
     $scope.$watch('vm.filterText', function () {
