@@ -5,7 +5,8 @@ function TreeChooserController(
   $element,
   $scope,
   $window,
-  TreeChooserItem
+  TreeChooserItem,
+  $timeout
 ) {
   var vm = this,
     _ = require('lodash');
@@ -49,9 +50,6 @@ function TreeChooserController(
    */
   vm.closeFromClick = function () {
     vm.close();
-    if (vm.selected) {
-      vm.toggleSelected(vm.selected);
-    }
     $scope.$apply();
   };
 
@@ -105,6 +103,7 @@ function TreeChooserController(
         vm.toggleSelectedActive();
         break;
       case 9: //Tab
+        vm.filterText = '';
         vm.close();
         break;
     }
@@ -141,9 +140,7 @@ function TreeChooserController(
         }
         break;
       case 9: //Tab
-        if (!vm.getPresentItems().length) {
-          vm.filterText = '';
-        }
+        vm.filterText = '';
         vm.close();
         break;
     }
@@ -333,6 +330,15 @@ function TreeChooserController(
       if (vm.deselectsChildren && vm.multiselect) {
         vm.deselectChildren(item);
       }
+    }
+  };
+
+  /**
+   * Show tree elements when input focused
+   */
+  vm.checkFocused = function () {
+    if (vm.focused && vm.showFocused) {
+      vm.show();
     }
   };
 
@@ -532,6 +538,10 @@ function TreeChooserController(
     if (!_.isNumber(vm.filterAutoShowLength)) {
       vm.filterAutoShowLength = 2;
     }
+    // Show list after focusing by default
+    if (_.isUndefined(vm.showFocused)) {
+      vm.showFocused = true;
+    }
     // Default filter node function
     if (!_.isFunction(vm.filterNode)) {
       vm.filterNode = function (item, filterText) {
@@ -558,15 +568,6 @@ function TreeChooserController(
   };
 
   this.registerWatches = function () {
-    /**
-     * Show tree elements when input focused
-     */
-    $scope.$watch('vm.focused', function () {
-      if (vm.focused) {
-        vm.show();
-      }
-    });
-
     /**
      * Update exclusions on filter text change
      */

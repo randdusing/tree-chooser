@@ -113,7 +113,12 @@ function TreeChooser($timeout) {
        * Disable outside click to close
        * @type {boolean}
        */
-      disableClick: '=?'
+      disableClick: '=?',
+
+      /**
+       * Show hierarchy list when input focused
+       */
+      showFocused: '=?'
     },
     template: require('./treeChooser.html'),
     link: function (scope, element) {
