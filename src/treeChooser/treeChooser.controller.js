@@ -273,13 +273,13 @@ function TreeChooserController(
   };
 
   /**
-   * Toggle selected unless disabled
+   * Toggle selected unless disabled and clear search query
    */
   vm.toggleSelected = function (item) {
     if (vm.disableNode(item)) {
       return;
     }
-
+    vm.filterText = '';
     vm.setSelected(item, !item.isSelected());
     if (item.isSelected() && !vm.multiselect) {
       vm.close();
