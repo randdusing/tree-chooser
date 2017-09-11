@@ -38,6 +38,7 @@ function TreeChooserController(
    * Close the search results, remove outside click handler
    */
   vm.close = function () {
+    vm.filterText = '';
     vm.reset();
     vm.shown = false;
     if (!vm.disableClick) {
@@ -103,7 +104,6 @@ function TreeChooserController(
         vm.toggleSelectedActive();
         break;
       case 9: //Tab
-        vm.filterText = '';
         vm.close();
         break;
     }
@@ -140,7 +140,6 @@ function TreeChooserController(
         }
         break;
       case 9: //Tab
-        vm.filterText = '';
         vm.close();
         break;
     }
@@ -279,7 +278,6 @@ function TreeChooserController(
     if (vm.disableNode(item)) {
       return;
     }
-    vm.filterText = '';
     vm.setSelected(item, !item.isSelected());
     if (item.isSelected() && !vm.multiselect) {
       vm.close();
@@ -318,7 +316,6 @@ function TreeChooserController(
     if (value && vm.onlyLeaves && !item.isLeaf()) {
       value = false;
     }
-    vm.selected = item;
     item.setSelected(value);
     if (value) {
       vm.addToModel(item);
@@ -330,15 +327,6 @@ function TreeChooserController(
       if (vm.deselectsChildren && vm.multiselect) {
         vm.deselectChildren(item);
       }
-    }
-  };
-
-  /**
-   * Show tree elements when input focused
-   */
-  vm.checkFocused = function () {
-    if (vm.focused && vm.showFocused) {
-      vm.show();
     }
   };
 
@@ -537,10 +525,6 @@ function TreeChooserController(
     // Auto show after specified filter text length
     if (!_.isNumber(vm.filterAutoShowLength)) {
       vm.filterAutoShowLength = 2;
-    }
-    // Show list after focusing by default
-    if (_.isUndefined(vm.showFocused)) {
-      vm.showFocused = true;
     }
     // Default filter node function
     if (!_.isFunction(vm.filterNode)) {

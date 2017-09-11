@@ -10,10 +10,9 @@
            ng-disabled="vm.ngDisabled"
            ng-model="vm.filterText"
            ng-keydown="vm.onTextKeyDown($event)"
-           ng-focus="vm.focused = true; vm.checkFocused()"
+           ng-focus="vm.focused = true; vm.show()"
            ng-blur="vm.focused = false"
-           placeholder="{{vm.ngPlaceholder}}"
-           ng-click="vm.show()">
+           placeholder="{{vm.ngPlaceholder}}">
   </div>
 
   <ul ng-show="vm.shown"
