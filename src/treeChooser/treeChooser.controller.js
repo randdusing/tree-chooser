@@ -140,6 +140,13 @@ function TreeChooserController(
         }
         break;
       case 9: //Tab
+        //if we have matches in list choose first one
+        var presentItems = vm.getPresentItems();
+        if (presentItems.length) {
+          var childs = [];
+          presentItems[0].getAllLeafs(childs);
+          vm.toggleSelected(childs[0]);
+        };
         vm.close();
         break;
     }
