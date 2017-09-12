@@ -95,18 +95,6 @@ function TreeChooserItemFactory () {
     this.expanded = !this.expanded;
   };
 
-  TreeChooserItem.prototype.getAllLeafs = function(result) {
-    var children = this.getChildren();
-    if (children.length) {
-      this.getChildren().forEach(function (child) {
-        return child.getAllLeafs(result);
-      });
-    } else {
-      result.push(this);
-    }
-  }
-  return TreeChooserItem;
-
   return TreeChooserItem;
 }
 

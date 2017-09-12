@@ -2,7 +2,7 @@
   <div class="treeChooser-input"
        ng-class="{'treeChooser-input-focused': vm.focused}">
     <span ng-if="vm.enablePills"
-          ng-click="vm.removeFromModel(item); focusInput(); vm.show();"
+          ng-click="vm.removeFromModel(item); focusInput();"
           ng-repeat="item in vm.getModelAsItems()">
       {{item[vm.properties.label]}}
     </span>

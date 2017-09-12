@@ -104,6 +104,7 @@ function TreeChooserController(
         vm.toggleSelectedActive();
         break;
       case 9: //Tab
+        vm.toggleSelectedActive();
         vm.close();
         break;
     }
@@ -140,13 +141,7 @@ function TreeChooserController(
         }
         break;
       case 9: //Tab
-        //if we have matches in list choose first one
-        var presentItems = vm.getPresentItems();
-        if (presentItems.length) {
-          var childs = [];
-          presentItems[0].getAllLeafs(childs);
-          vm.toggleSelected(childs[0]);
-        };
+        vm.toggleSelectedActive();
         vm.close();
         break;
     }
@@ -279,12 +274,13 @@ function TreeChooserController(
   };
 
   /**
-   * Toggle selected unless disabled and clear search query
+   * Toggle selected unless disabled
    */
   vm.toggleSelected = function (item) {
     if (vm.disableNode(item)) {
       return;
     }
+
     vm.setSelected(item, !item.isSelected());
     if (item.isSelected() && !vm.multiselect) {
       vm.close();
@@ -359,11 +355,15 @@ function TreeChooserController(
 
   /**
    * Recursively set exclusions so that parents of included children aren't hidden
+   * and fill array of matched leaf elements
    */
-  vm.setExclusions = function (items) {
+  vm.setExclusions = function (items, parentMatched) {
     _.forEach(items, function (item) {
-      vm.setExclusions(item.getChildren());
-      item.setExcluded(!vm.isMatch(item) && !item.hasAChildPresent());
+      if ((vm.isMatch(item) || parentMatched) && !item.getChildren().length ) {
+        vm.leafElements.push(item);
+      }
+      vm.setExclusions(item.getChildren(), parentMatched || vm.isMatch(item));
+      item.setExcluded(!vm.isMatch(item) && !item.hasAChildPresent() && !parentMatched);
     });
   };
 
@@ -563,7 +563,16 @@ function TreeChooserController(
      * Update exclusions on filter text change
      */
     $scope.$watch('vm.filterText', function () {
+      var active = vm.findActive();
+      if (active) {
+        active.setActive(false);
+      }
+      //clear leaf elements in list, fill it and set first item active
+      vm.leafElements = [];
       vm.setExclusions(vm.items);
+      if (vm.filterText !== '' && vm.leafElements.length) {
+        vm.leafElements[0].setActive(true);
+      }
       if (_.size(vm.filterText) === vm.filterAutoShowLength) {
         vm.showAll();
       }
