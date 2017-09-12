@@ -113,7 +113,13 @@ function TreeChooser($timeout) {
        * Disable outside click to close
        * @type {boolean}
        */
-      disableClick: '=?'
+      disableClick: '=?',
+
+      /**
+       * Disable nodes with childs to be active
+       * @type {boolean}
+       */
+      disableActiveNodes: '=?'
     },
     template: require('./treeChooser.html'),
     link: function (scope, element) {

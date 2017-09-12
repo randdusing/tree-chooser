@@ -359,9 +359,6 @@ function TreeChooserController(
    */
   vm.setExclusions = function (items, parentMatched) {
     _.forEach(items, function (item) {
-      if ((vm.isMatch(item) || parentMatched) && !item.getChildren().length ) {
-        vm.leafElements.push(item);
-      }
       vm.setExclusions(item.getChildren(), parentMatched || vm.isMatch(item));
       item.setExcluded(!vm.isMatch(item) && !item.hasAChildPresent() && !parentMatched);
     });
@@ -490,6 +487,15 @@ function TreeChooserController(
       .value();
   };
 
+  vm.chooseActive = function(item) {
+    var childs = item.getChildren();
+    if (vm.disableActiveNodes && childs.length) {
+      vm.chooseActive(childs[0]);
+    } else {
+      item.setActive(true);
+    }
+  };
+
   this.$onInit = function () {
     // Flag to determine whether search results are showing
     vm.shown = false;
@@ -548,6 +554,11 @@ function TreeChooserController(
       vm.disableClick = false;
     }
 
+    // Default to enable nodes to be active
+    if (!_.isUndefined(vm.disableActiveNodes)) {
+      vm.disableActiveNodes = false;
+    }
+
     // Get access to ngModel
     vm.ngModel = $element.controller('ngModel');
     // And override $isEmpty to account for array emptiness if multiselect
@@ -567,11 +578,10 @@ function TreeChooserController(
       if (active) {
         active.setActive(false);
       }
-      //clear leaf elements in list, fill it and set first item active
-      vm.leafElements = [];
       vm.setExclusions(vm.items);
-      if (vm.filterText !== '' && vm.leafElements.length) {
-        vm.leafElements[0].setActive(true);
+      var items = vm.getPresentItems();
+      if (vm.filterText !== '' && items.length) {
+        vm.chooseActive(items[0]);
       }
       if (_.size(vm.filterText) === vm.filterAutoShowLength) {
         vm.showAll();
