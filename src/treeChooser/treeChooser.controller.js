@@ -487,11 +487,11 @@ function TreeChooserController(
       .value();
   };
 
-  vm.chooseActive = function(item) {
-    var childs = item.getChildren();
-    if (vm.disableActiveNodes && childs.length) {
-      vm.chooseActive(childs[0]);
-    } else {
+  vm.chooseActive = function() {
+    var item = vm.itemsFlat.find(function(item) {
+      return item.isShowing() && (!vm.onlyLeaves || item.isLeaf());
+    });
+    if (item) {
       item.setActive(true);
     }
   };
@@ -554,11 +554,6 @@ function TreeChooserController(
       vm.disableClick = false;
     }
 
-    // Default to enable nodes to be active
-    if (!_.isUndefined(vm.disableActiveNodes)) {
-      vm.disableActiveNodes = false;
-    }
-
     // Get access to ngModel
     vm.ngModel = $element.controller('ngModel');
     // And override $isEmpty to account for array emptiness if multiselect
@@ -580,7 +575,7 @@ function TreeChooserController(
       }
       vm.setExclusions(vm.items);
       var items = vm.getPresentItems();
-      if (vm.filterText !== '' && items.length) {
+      if (!_.isEmpty(vm.filterText) && !_.isEmpty(items)) {
         vm.chooseActive(items[0]);
       }
       if (_.size(vm.filterText) === vm.filterAutoShowLength) {
