@@ -5,7 +5,8 @@ function TreeChooserController(
   $element,
   $scope,
   $window,
-  TreeChooserItem
+  TreeChooserItem,
+  $timeout
 ) {
   var vm = this,
     _ = require('lodash');
@@ -26,7 +27,10 @@ function TreeChooserController(
 
     // Add event listener to determine when user clicks outside of tree chooser
     if (!vm.disableClick) {
-      $window.addEventListener('click', vm.closeFromClick);
+      //wrap to $timeout to avoid immediate call because of current click event
+      $timeout(function () {
+        $window.addEventListener('click', vm.closeFromClick);
+      });
     }
   };
 
@@ -34,6 +38,7 @@ function TreeChooserController(
    * Close the search results, remove outside click handler
    */
   vm.close = function () {
+    vm.filterText = '';
     vm.reset();
     vm.shown = false;
     if (!vm.disableClick) {
@@ -99,6 +104,7 @@ function TreeChooserController(
         vm.toggleSelectedActive();
         break;
       case 9: //Tab
+        vm.toggleSelectedActive();
         vm.close();
         break;
     }
@@ -135,6 +141,7 @@ function TreeChooserController(
         }
         break;
       case 9: //Tab
+        vm.toggleSelectedActive();
         vm.close();
         break;
     }
@@ -348,11 +355,12 @@ function TreeChooserController(
 
   /**
    * Recursively set exclusions so that parents of included children aren't hidden
+   * and fill array of matched leaf elements
    */
-  vm.setExclusions = function (items) {
+  vm.setExclusions = function (items, parentMatched) {
     _.forEach(items, function (item) {
-      vm.setExclusions(item.getChildren());
-      item.setExcluded(!vm.isMatch(item) && !item.hasAChildPresent());
+      vm.setExclusions(item.getChildren(), parentMatched || vm.isMatch(item));
+      item.setExcluded(!vm.isMatch(item) && !item.hasAChildPresent() && !parentMatched);
     });
   };
 
@@ -479,6 +487,15 @@ function TreeChooserController(
       .value();
   };
 
+  vm.chooseActive = function() {
+    var item = vm.itemsFlat.find(function(item) {
+      return item.isShowing() && (!vm.onlyLeaves || item.isLeaf());
+    });
+    if (item) {
+      item.setActive(true);
+    }
+  };
+
   this.$onInit = function () {
     // Flag to determine whether search results are showing
     vm.shown = false;
@@ -552,7 +569,15 @@ function TreeChooserController(
      * Update exclusions on filter text change
      */
     $scope.$watch('vm.filterText', function () {
+      var active = vm.findActive();
+      if (active) {
+        active.setActive(false);
+      }
       vm.setExclusions(vm.items);
+      var items = vm.getPresentItems();
+      if (!_.isEmpty(vm.filterText) && !_.isEmpty(items)) {
+        vm.chooseActive(items[0]);
+      }
       if (_.size(vm.filterText) === vm.filterAutoShowLength) {
         vm.showAll();
       }
