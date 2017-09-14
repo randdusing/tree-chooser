@@ -1,3 +1,9 @@
+## 0.0.10 - 2017-09-13
+- Select on tab
+- Better select active tab on search text change
+- Show all children of present items on search
+- Make lodash external dependency
+
 ## 0.0.9 - 2017-08-13
 - Ability to disable click outside to close
 
