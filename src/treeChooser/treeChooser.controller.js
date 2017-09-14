@@ -31,11 +31,24 @@ function TreeChooserController(
   };
 
   /**
+   * Show on focus, unless returning from the list
+   * @param {Event} $event
+   */
+  vm.tryShow = function ($event) {
+    if (_.includes(_.get($event.relatedTarget, 'className'), 'treeChooser-list')) {
+      return;
+    }
+    vm.show();
+  };
+
+  /**
    * Close the search results, remove outside click handler
    */
   vm.close = function () {
+    vm.filterText = '';
     vm.reset();
     vm.shown = false;
+    vm.clearActive();
     if (!vm.disableClick) {
       $window.removeEventListener('click', vm.closeFromClick);
     }
@@ -99,6 +112,7 @@ function TreeChooserController(
         vm.toggleSelectedActive();
         break;
       case 9: //Tab
+        vm.toggleSelectedActive(true);
         vm.close();
         break;
     }
@@ -135,6 +149,7 @@ function TreeChooserController(
         }
         break;
       case 9: //Tab
+        vm.toggleSelectedActive(true);
         vm.close();
         break;
     }
@@ -249,10 +264,15 @@ function TreeChooserController(
 
   /**
    * Toggle selection on active item
+   * @param {boolean} [isTab]
    */
-  vm.toggleSelectedActive = function () {
+  vm.toggleSelectedActive = function (isTab) {
     var active = vm.findActive();
     if (active) {
+      // Don't unselect on tab
+      if (isTab && active.isSelected()) {
+        return;
+      }
       vm.toggleSelected(active);
     }
   };
@@ -348,11 +368,13 @@ function TreeChooserController(
 
   /**
    * Recursively set exclusions so that parents of included children aren't hidden
+   * @param {Array} items
+   * @param {boolean} parentMatched
    */
-  vm.setExclusions = function (items) {
+  vm.setExclusions = function (items, parentMatched) {
     _.forEach(items, function (item) {
-      vm.setExclusions(item.getChildren());
-      item.setExcluded(!vm.isMatch(item) && !item.hasAChildPresent());
+      vm.setExclusions(item.getChildren(), parentMatched || vm.isMatch(item));
+      item.setExcluded(!vm.isMatch(item) && !item.hasAChildPresent() && !parentMatched);
     });
   };
 
@@ -479,6 +501,36 @@ function TreeChooserController(
       .value();
   };
 
+  /**
+   * Set the active element on search
+   */
+  vm.setActive = function () {
+    var active = vm.findActive();
+    if (active && active.isPresent()) {
+      // If currently active item is still present, don't do anything
+      return;
+    } else if (active) {
+      active.setActive(false);
+    }
+
+    var first;
+    if (vm.onlyLeaves) {
+      // Find first present leaf in flat items
+      first = _.find(vm.itemsFlat, function (item) {
+        return item.isLeaf() && item.isPresent();
+      });
+    } else {
+      // Find first present branch, at least one branch will be present in items
+      first = _.find(vm.items, function (item) {
+        return item.isPresent();
+      });
+    }
+
+    if (first) {
+      first.setActive(true);
+    }
+  };
+
   this.$onInit = function () {
     // Flag to determine whether search results are showing
     vm.shown = false;
@@ -556,6 +608,7 @@ function TreeChooserController(
       if (_.size(vm.filterText) === vm.filterAutoShowLength) {
         vm.showAll();
       }
+      vm.setActive();
     });
 
     /**
