@@ -9,11 +9,15 @@ module.exports = {
   },
   output: {
     path: './dist',
-    filename: '[name].js'
+    filename: '[name].js',
+    library: 'tree-chooser',
+    libraryTarget: 'commonjs'
   },
   externals: {
     angular: 'angular',
-    lodash: '_'
+    lodash : {
+      'commonjs': 'lodash'
+    }
   },
   module: {
     preLoaders: [
