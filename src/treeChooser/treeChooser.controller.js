@@ -605,7 +605,7 @@ function TreeChooserController(
      */
     $scope.$watch('vm.filterText', function () {
       vm.setExclusions(vm.items);
-      if (_.size(vm.filterText) === vm.filterAutoShowLength) {
+      if (_.size(vm.filterText) >= vm.filterAutoShowLength) {
         vm.showAll();
       }
       vm.setActive();

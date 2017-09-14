@@ -1,3 +1,6 @@
+## 0.0.11 - 2017-09-13
+- Fix issue with show list and minimum text
+
 ## 0.0.10 - 2017-09-13
 - Select on tab
 - Better select active tab on search text change
