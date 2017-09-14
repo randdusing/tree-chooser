@@ -22,9 +22,9 @@ webpackJsonp([0],{
 	
 	__webpack_require__(301);
 	__webpack_require__(305);
-	__webpack_require__(306);
+	__webpack_require__(308);
 	
-	var _ = __webpack_require__(308);
+	var _ = __webpack_require__(306);
 	
 	var app = _angular2.default.module('app', ['treeChooser']).controller('treeChooserExample', function (treeChooserExample) {
 	  var vm = this;
