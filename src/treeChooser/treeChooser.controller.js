@@ -5,7 +5,8 @@ function TreeChooserController(
   $element,
   $scope,
   $window,
-  TreeChooserItem
+  TreeChooserItem,
+  $timeout
 ) {
   var vm = this,
     _ = require('lodash');
@@ -26,7 +27,9 @@ function TreeChooserController(
 
     // Add event listener to determine when user clicks outside of tree chooser
     if (!vm.disableClick) {
-      $window.addEventListener('click', vm.closeFromClick);
+      $timeout(function () {
+        $window.addEventListener('click', vm.closeFromClick);
+      });
     }
   };
 
