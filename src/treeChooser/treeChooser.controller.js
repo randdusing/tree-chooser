@@ -85,7 +85,11 @@ function TreeChooserController(
     switch ($event.keyCode) {
       case 27: //Escape
         shouldStop = true;
-        vm.close();
+        if (vm.selected) {
+          vm.toggleSelected(vm.selected);
+        } else {
+          vm.close();
+        }
         $scope.focusInput();
         break;
       case 13: //Enter
@@ -133,7 +137,11 @@ function TreeChooserController(
   vm.onTextKeyDown = function ($event) {
     switch ($event.keyCode) {
       case 27: //Escape
-        vm.close();
+        if (vm.selected) {
+          vm.toggleSelected(vm.selected);
+        } else {
+          vm.close();
+        }
         break;
       case 13: //Enter
         if (vm.shown) {
@@ -335,6 +343,7 @@ function TreeChooserController(
     if (value && vm.onlyLeaves && !item.isLeaf()) {
       value = false;
     }
+    vm.selected = item;
     item.setSelected(value);
     if (value) {
       vm.addToModel(item);
