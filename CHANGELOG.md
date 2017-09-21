@@ -1,3 +1,10 @@
+## 0.0.13 - 2017-09-20
+- Fix click issue
+- Improve active list item styles
+
+## 0.0.12 - 2017-09-16
+- Make Angular a peer dependency
+
 ## 0.0.11 - 2017-09-13
 - Fix issue with show list and minimum text
 
