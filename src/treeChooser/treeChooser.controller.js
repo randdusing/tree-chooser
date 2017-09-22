@@ -397,6 +397,27 @@ function TreeChooserController(
   };
 
   /**
+   * Hide all child nodes in a root parents
+   */
+  vm.minimize = function () {
+    _(vm.itemsFlat).filter(function (item) {
+      return item.isPresent();
+    }).forEach(function (item) {
+      item.setExpanded(false);
+    });
+  };
+
+  /**
+   * Set active property to false if active item exists
+   */
+  vm.resetActive = function () {
+    var active = vm.findActive();
+    if (active) {
+      active.setActive(false);
+    }
+  };
+
+  /**
    * Clear all no leaves
    * @todo if deselect Children is enabled, won't this deselect leaves?
    */
@@ -508,14 +529,7 @@ function TreeChooserController(
    * Set the active element on search
    */
   vm.setActive = function () {
-    var active = vm.findActive();
-    if (active && active.isPresent()) {
-      // If currently active item is still present, don't do anything
-      return;
-    } else if (active) {
-      active.setActive(false);
-    }
-
+    vm.resetActive();
     var first;
     if (vm.onlyLeaves) {
       // Find first present leaf in flat items
@@ -610,8 +624,11 @@ function TreeChooserController(
       vm.setExclusions(vm.items);
       if (_.size(vm.filterText) >= vm.filterAutoShowLength) {
         vm.showAll();
+        vm.setActive();
+      } else {
+        vm.minimize();
+        vm.resetActive();
       }
-      vm.setActive();
     });
 
     /**
