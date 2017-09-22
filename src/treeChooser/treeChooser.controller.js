@@ -397,17 +397,6 @@ function TreeChooserController(
   };
 
   /**
-   * Hide all child nodes in a root parents
-   */
-  vm.minimize = function () {
-    _(vm.itemsFlat).filter(function (item) {
-      return item.isPresent();
-    }).forEach(function (item) {
-      item.setExpanded(false);
-    });
-  };
-
-  /**
    * Set active property to false if active item exists
    */
   vm.resetActive = function () {
@@ -626,7 +615,7 @@ function TreeChooserController(
         vm.showAll();
         vm.setActive();
       } else {
-        vm.minimize();
+        vm.reset();
         vm.resetActive();
       }
     });
