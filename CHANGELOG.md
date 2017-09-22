@@ -1,3 +1,6 @@
+## 0.0.14 - 2017-09-21
+- Actually publish dist!
+
 ## 0.0.13 - 2017-09-20
 - Fix click issue
 - Improve active list item styles

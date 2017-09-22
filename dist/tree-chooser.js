@@ -264,8 +264,8 @@ exports["tree-chooser"] =
 	
 	/*@ngInject*/
 	
-	TreeChooserController.$inject = ['$element', '$scope', '$window', 'TreeChooserItem'];
-	function TreeChooserController($element, $scope, $window, TreeChooserItem) {
+	TreeChooserController.$inject = ['$element', '$scope', '$timeout', '$window', 'TreeChooserItem'];
+	function TreeChooserController($element, $scope, $timeout, $window, TreeChooserItem) {
 	  var vm = this,
 	      _ = __webpack_require__(10);
 	
@@ -285,7 +285,9 @@ exports["tree-chooser"] =
 	
 	    // Add event listener to determine when user clicks outside of tree chooser
 	    if (!vm.disableClick) {
-	      $window.addEventListener('click', vm.closeFromClick);
+	      $timeout(function () {
+	        $window.addEventListener('click', vm.closeFromClick);
+	      });
 	    }
 	  };
 	
