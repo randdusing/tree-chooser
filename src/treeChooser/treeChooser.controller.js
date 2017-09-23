@@ -616,7 +616,6 @@ function TreeChooserController(
         vm.setActive();
       } else {
         vm.reset();
-        vm.resetActive();
       }
     });
 
