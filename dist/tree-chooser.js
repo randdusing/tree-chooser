@@ -666,6 +666,16 @@ exports["tree-chooser"] =
 	  };
 	
 	  /**
+	   * Set active property to false if active item exists
+	   */
+	  vm.resetActive = function () {
+	    var active = vm.findActive();
+	    if (active) {
+	      active.setActive(false);
+	    }
+	  };
+	
+	  /**
 	   * Clear all no leaves
 	   * @todo if deselect Children is enabled, won't this deselect leaves?
 	   */
@@ -771,14 +781,7 @@ exports["tree-chooser"] =
 	   * Set the active element on search
 	   */
 	  vm.setActive = function () {
-	    var active = vm.findActive();
-	    if (active && active.isPresent()) {
-	      // If currently active item is still present, don't do anything
-	      return;
-	    } else if (active) {
-	      active.setActive(false);
-	    }
-	
+	    vm.resetActive();
 	    var first;
 	    if (vm.onlyLeaves) {
 	      // Find first present leaf in flat items
@@ -873,8 +876,10 @@ exports["tree-chooser"] =
 	      vm.setExclusions(vm.items);
 	      if (_.size(vm.filterText) >= vm.filterAutoShowLength) {
 	        vm.showAll();
+	        vm.setActive();
+	      } else {
+	        vm.reset();
 	      }
-	      vm.setActive();
 	    });
 	
 	    /**

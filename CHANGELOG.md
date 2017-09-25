@@ -1,3 +1,6 @@
+## 0.0.15 - 2017-09-24
+- Reset active on text that doesn't meet minimum
+
 ## 0.0.14 - 2017-09-21
 - Actually publish dist!
 
