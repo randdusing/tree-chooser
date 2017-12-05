@@ -347,6 +347,7 @@ function TreeChooserController(
         vm.deselectChildren(item);
       }
     }
+    $scope.focusInputDiv();
   };
 
   /**
