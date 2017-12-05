@@ -127,6 +127,13 @@ function TreeChooser($timeout) {
         event.stopPropagation();
       });
 
+      var inputDiv = angular.element(element[0].querySelector('.treeChooser-input'));
+      scope.focusInputDiv = function () {
+        $timeout(function () {
+          inputDiv[0].focus();
+        });
+      };
+
       scope.focusInput = function () {
         $timeout(function () {
           input[0].focus();
