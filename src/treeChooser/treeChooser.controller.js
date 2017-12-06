@@ -340,6 +340,8 @@ function TreeChooserController(
       vm.addToModel(item);
       if (vm.selectsChildren && vm.multiselect) {
         vm.selectChildren(item);
+      } else if (!vm.selectsChildren && !vm.multiselect) {
+        $scope.focusInputDiv();
       }
     } else {
       vm.removeFromModel(item.getItem());
@@ -347,7 +349,6 @@ function TreeChooserController(
         vm.deselectChildren(item);
       }
     }
-    $scope.focusInputDiv();
   };
 
   /**
