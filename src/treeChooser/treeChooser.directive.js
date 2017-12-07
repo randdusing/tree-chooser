@@ -128,9 +128,13 @@ function TreeChooser($timeout) {
       });
 
       var inputDiv = angular.element(element[0].querySelector('.treeChooser-input'));
-      scope.focusInputDiv = function () {
+      scope.focusSpan = function () {
         $timeout(function () {
-          inputDiv[0].focus();
+          var span = inputDiv[0].querySelector('span');
+          if (span) {
+            span.setAttribute('tabindex', '0');
+            span.focus();
+          }
         });
       };
 

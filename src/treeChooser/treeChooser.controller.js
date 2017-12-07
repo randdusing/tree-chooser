@@ -341,7 +341,7 @@ function TreeChooserController(
       if (vm.selectsChildren && vm.multiselect) {
         vm.selectChildren(item);
       } else if (!vm.selectsChildren && !vm.multiselect) {
-        $scope.focusInputDiv();
+        $scope.focusSpan();
       }
     } else {
       vm.removeFromModel(item.getItem());
