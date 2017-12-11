@@ -128,9 +128,19 @@ function TreeChooser($timeout) {
       });
 
       var treeChooserDiv = angular.element(element[0].querySelector('.treeChooser'));
-      scope.focusTreeChooserDiv = function () {
+      scope.addTabindex = function () {
         $timeout(function () {
           treeChooserDiv[0].setAttribute('tabindex', '0');
+        });
+      };
+      scope.removeTabindex = function () {
+        $timeout(function () {
+          treeChooserDiv[0].removeAttribute('tabindex');
+        });
+      };
+      scope.focusTreeChooserDiv = function () {
+        scope.addTabindex();
+        $timeout(function () {
           treeChooserDiv.focus();
         });
       };
@@ -161,12 +171,6 @@ function TreeChooser($timeout) {
           if (active) {
             list[0].scrollTop = active.offsetTop;
           }
-        });
-      };
-
-      scope.removeTabindex = function () {
-        $timeout(function () {
-          treeChooserDiv[0].removeAttribute('tabindex');
         });
       };
     }
