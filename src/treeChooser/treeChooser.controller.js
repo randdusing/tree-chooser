@@ -341,7 +341,7 @@ function TreeChooserController(
       if (vm.selectsChildren && vm.multiselect) {
         vm.selectChildren(item);
       } else if (!vm.selectsChildren && !vm.multiselect) {
-        $scope.focusSpan();
+        $scope.focusTreeChooserDiv();
       }
     } else {
       vm.removeFromModel(item.getItem());
@@ -452,6 +452,7 @@ function TreeChooserController(
   vm.removeFromModel = function (item) {
     if (!vm.multiselect) {
       vm.ngModel.$setViewValue(null);
+      $scope.removeTabindex();
     } else {
       if (item) {
         var id = _.get(item, vm.properties.id);

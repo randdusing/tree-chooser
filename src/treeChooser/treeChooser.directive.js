@@ -127,14 +127,11 @@ function TreeChooser($timeout) {
         event.stopPropagation();
       });
 
-      var inputDiv = angular.element(element[0].querySelector('.treeChooser-input'));
-      scope.focusSpan = function () {
+      var treeChooserDiv = angular.element(element[0].querySelector('.treeChooser'));
+      scope.focusTreeChooserDiv = function () {
         $timeout(function () {
-          var span = inputDiv[0].querySelector('span');
-          if (span) {
-            span.setAttribute('tabindex', '0');
-            span.focus();
-          }
+          treeChooserDiv[0].setAttribute('tabindex', '0');
+          treeChooserDiv.focus();
         });
       };
 
@@ -164,6 +161,12 @@ function TreeChooser($timeout) {
           if (active) {
             list[0].scrollTop = active.offsetTop;
           }
+        });
+      };
+
+      scope.removeTabindex = function () {
+        $timeout(function () {
+          treeChooserDiv[0].removeAttribute('tabindex');
         });
       };
     }
