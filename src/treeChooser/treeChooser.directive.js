@@ -134,9 +134,7 @@ function TreeChooser($timeout) {
         });
       };
       scope.removeTabindex = function () {
-        $timeout(function () {
-          treeChooserDiv[0].removeAttribute('tabindex');
-        });
+        treeChooserDiv[0].removeAttribute('tabindex');
       };
       scope.focusTreeChooserDiv = function () {
         scope.addTabindex();
