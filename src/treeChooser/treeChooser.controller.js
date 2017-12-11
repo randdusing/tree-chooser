@@ -421,7 +421,7 @@ function TreeChooserController(
   };
 
   /**
-   * Get model as items because it could be ssaved as id
+   * Get model as items because it could be saved as id
    */
   vm.getModelAsItems = function () {
     return _(vm.multiselect ? vm.ngModel.$viewValue : [vm.ngModel.$viewValue])
@@ -483,6 +483,12 @@ function TreeChooserController(
       var checkItem = vm.itemsIndex[id];
       if (checkItem) {
         checkItem.setSelected(true);
+        if (vm.isInitialLoad) {
+          vm.isInitialLoad = false;
+          if (!vm.selectsChildren && !vm.multiselect) {
+            $scope.addTabindex();
+          }
+        }
       } else if (vm.restrictModel) {
         toDelete.push(item);
       }
@@ -543,6 +549,9 @@ function TreeChooserController(
   this.$onInit = function () {
     // Flag to determine whether search results are showing
     vm.shown = false;
+
+    // flag indicating that this is the initial load
+    vm.isInitialLoad = true;
 
     // Properties use to access special parts of item
     vm.properties = {
