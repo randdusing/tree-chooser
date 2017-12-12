@@ -553,6 +553,9 @@ function TreeChooserController(
     // flag indicating that this is the initial load
     vm.isInitialLoad = true;
 
+    // default .treeChooser tabindex value
+    vm.tabindex='-1';
+
     // Properties use to access special parts of item
     vm.properties = {
       id: vm.idProperty || 'id',
