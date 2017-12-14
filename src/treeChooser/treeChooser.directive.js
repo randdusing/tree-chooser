@@ -136,7 +136,9 @@ function TreeChooser($timeout) {
       };
       scope.focusTreeChooserDiv = function () {
         scope.addTabindex();
-        treeChooserDiv.focus();
+        if (treeChooserDiv && treeChooserDiv.focus) {
+          treeChooserDiv.focus();
+        }
       };
 
       scope.focusInput = function () {
