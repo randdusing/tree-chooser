@@ -43,7 +43,7 @@ exports["tree-chooser"] =
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -56,15 +56,15 @@ exports["tree-chooser"] =
 	
 	module.exports = treeChooser;
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = require("angular");
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -72,9 +72,9 @@ exports["tree-chooser"] =
 	  treeChooser.directive('treeChooser', __webpack_require__(3)).controller('treeChooserController', __webpack_require__(9));
 	};
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -207,6 +207,20 @@ exports["tree-chooser"] =
 	        event.stopPropagation();
 	      });
 	
+	      var treeChooserDiv = angular.element(element[0].querySelector('.treeChooser'));
+	      scope.addTabindex = function () {
+	        this.vm.tabindex = '0';
+	      };
+	      scope.removeTabindex = function () {
+	        this.vm.tabindex = '-1';
+	      };
+	      scope.focusTreeChooserDiv = function () {
+	        scope.addTabindex();
+	        $timeout(function () {
+	          treeChooserDiv[0].focus();
+	        });
+	      };
+	
 	      scope.focusInput = function () {
 	        $timeout(function () {
 	          input[0].focus();
@@ -241,24 +255,24 @@ exports["tree-chooser"] =
 	
 	module.exports = TreeChooser;
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	// removed by extract-text-webpack-plugin
 
-/***/ },
+/***/ }),
 /* 5 */,
 /* 6 */,
 /* 7 */,
 /* 8 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
-	module.exports = "<div class=treeChooser> <div class=treeChooser-input ng-class=\"{'treeChooser-input-focused': vm.focused}\"> <span ng-if=vm.enablePills ng-click=\"vm.removeFromModel(item); focusInput();\" ng-repeat=\"item in vm.getModelAsItems()\"> {{item[vm.properties.label]}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) ng-focus=\"vm.focused = true; vm.tryShow($event);\" ng-blur=\"vm.focused = false\" placeholder={{vm.ngPlaceholder}}> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-style=getListStyles() class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";
+	module.exports = "<div class=treeChooser ng-attr-tabindex={{vm.tabindex}}> <div class=treeChooser-input ng-class=\"{'treeChooser-input-focused': vm.focused}\"> <span ng-if=vm.enablePills ng-click=\"vm.removeFromModel(item); focusInput();\" ng-repeat=\"item in vm.getModelAsItems()\"> {{item[vm.properties.label]}} </span> <input type=text ng-disabled=vm.ngDisabled ng-model=vm.filterText ng-keydown=vm.onTextKeyDown($event) ng-focus=\"vm.focused = true; vm.tryShow($event);\" ng-blur=\"vm.focused = false\" placeholder={{vm.ngPlaceholder}}> </div> <ul ng-show=vm.shown ng-keydown=vm.onListKeyDown($event) ng-style=getListStyles() class=treeChooser-list tabindex=-1> <li ng-repeat=\"item in vm.getPresentItems()\" tree-chooser-item=item></li> <li ng-if=!vm.getPresentItems().length>No match</li> </ul> </div> ";
 
-/***/ },
+/***/ }),
 /* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -611,6 +625,8 @@ exports["tree-chooser"] =
 	      vm.addToModel(item);
 	      if (vm.selectsChildren && vm.multiselect) {
 	        vm.selectChildren(item);
+	      } else if (!vm.selectsChildren && !vm.multiselect) {
+	        $scope.focusTreeChooserDiv();
 	      }
 	    } else {
 	      vm.removeFromModel(item.getItem());
@@ -688,7 +704,7 @@ exports["tree-chooser"] =
 	  };
 	
 	  /**
-	   * Get model as items because it could be ssaved as id
+	   * Get model as items because it could be saved as id
 	   */
 	  vm.getModelAsItems = function () {
 	    return _(vm.multiselect ? vm.ngModel.$viewValue : [vm.ngModel.$viewValue]).map(function (item) {
@@ -716,6 +732,7 @@ exports["tree-chooser"] =
 	  vm.removeFromModel = function (item) {
 	    if (!vm.multiselect) {
 	      vm.ngModel.$setViewValue(null);
+	      $scope.removeTabindex();
 	    } else {
 	      if (item) {
 	        var id = _.get(item, vm.properties.id);
@@ -746,6 +763,12 @@ exports["tree-chooser"] =
 	      var checkItem = vm.itemsIndex[id];
 	      if (checkItem) {
 	        checkItem.setSelected(true);
+	        if (vm.isInitialLoad) {
+	          vm.isInitialLoad = false;
+	          if (!vm.selectsChildren && !vm.multiselect) {
+	            $scope.addTabindex();
+	          }
+	        }
 	      } else if (vm.restrictModel) {
 	        toDelete.push(item);
 	      }
@@ -803,6 +826,12 @@ exports["tree-chooser"] =
 	  this.$onInit = function () {
 	    // Flag to determine whether search results are showing
 	    vm.shown = false;
+	
+	    // flag indicating that this is the initial load
+	    vm.isInitialLoad = true;
+	
+	    // default .treeChooser tabindex value
+	    vm.tabindex = '-1';
 	
 	    // Properties use to access special parts of item
 	    vm.properties = {
@@ -941,15 +970,15 @@ exports["tree-chooser"] =
 	
 	module.exports = TreeChooserController;
 
-/***/ },
+/***/ }),
 /* 10 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = require("lodash");
 
-/***/ },
+/***/ }),
 /* 11 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -957,9 +986,9 @@ exports["tree-chooser"] =
 	  treeChooser.directive('treeChooserItem', __webpack_require__(12)).controller('treeChooserItemController', __webpack_require__(14)).factory('TreeChooserItem', __webpack_require__(15));
 	};
 
-/***/ },
+/***/ }),
 /* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -978,15 +1007,15 @@ exports["tree-chooser"] =
 	
 	module.exports = TreeChooserItem;
 
-/***/ },
+/***/ }),
 /* 13 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = "<span class=treeChooser-item ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";
 
-/***/ },
+/***/ }),
 /* 14 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 	
@@ -1000,9 +1029,9 @@ exports["tree-chooser"] =
 	
 	module.exports = TreeChooserItemController;
 
-/***/ },
+/***/ }),
 /* 15 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -1108,6 +1137,6 @@ exports["tree-chooser"] =
 	
 	module.exports = TreeChooserItemFactory;
 
-/***/ }
+/***/ })
 /******/ ]);
 //# sourceMappingURL=tree-chooser.js.map
