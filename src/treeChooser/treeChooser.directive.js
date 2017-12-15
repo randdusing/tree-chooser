@@ -127,6 +127,20 @@ function TreeChooser($timeout) {
         event.stopPropagation();
       });
 
+      var treeChooserDiv = angular.element(element[0].querySelector('.treeChooser'));
+      scope.addTabindex = function () {
+        this.vm.tabindex = '0';
+      };
+      scope.removeTabindex = function () {
+        this.vm.tabindex = '-1';
+      };
+      scope.focusTreeChooserDiv = function () {
+        scope.addTabindex();
+        $timeout(function () {
+          treeChooserDiv[0].focus();
+        });
+      };
+
       scope.focusInput = function () {
         $timeout(function () {
           input[0].focus();
