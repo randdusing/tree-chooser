@@ -9,7 +9,7 @@ function TreeChooserItemFactory () {
     this.properties = properties;
     this.id = _.get(this.item, this.properties.id);
     this.label = _.get(this.item, this.properties.label);
-    this.listLabel = _.get(this.item, this.properties.listLabel);
+    this.listLabel = _.get(this.item, this.properties.listLabel) || this.label;
 
     this.parent = parent;
 
