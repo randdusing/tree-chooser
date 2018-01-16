@@ -340,6 +340,8 @@ function TreeChooserController(
       vm.addToModel(item);
       if (vm.selectsChildren && vm.multiselect) {
         vm.selectChildren(item);
+      } else if (!vm.selectsChildren && !vm.multiselect) {
+        $scope.focusTreeChooserDiv();
       }
     } else {
       vm.removeFromModel(item.getItem());
@@ -397,6 +399,16 @@ function TreeChooserController(
   };
 
   /**
+   * Set active property to false if active item exists
+   */
+  vm.resetActive = function () {
+    var active = vm.findActive();
+    if (active) {
+      active.setActive(false);
+    }
+  };
+
+  /**
    * Clear all no leaves
    * @todo if deselect Children is enabled, won't this deselect leaves?
    */
@@ -409,7 +421,7 @@ function TreeChooserController(
   };
 
   /**
-   * Get model as items because it could be ssaved as id
+   * Get model as items because it could be saved as id
    */
   vm.getModelAsItems = function () {
     return _(vm.multiselect ? vm.ngModel.$viewValue : [vm.ngModel.$viewValue])
@@ -440,6 +452,7 @@ function TreeChooserController(
   vm.removeFromModel = function (item) {
     if (!vm.multiselect) {
       vm.ngModel.$setViewValue(null);
+      $scope.removeTabindex();
     } else {
       if (item) {
         var id = _.get(item, vm.properties.id);
@@ -470,6 +483,12 @@ function TreeChooserController(
       var checkItem = vm.itemsIndex[id];
       if (checkItem) {
         checkItem.setSelected(true);
+        if (vm.isInitialLoad) {
+          vm.isInitialLoad = false;
+          if (!vm.selectsChildren && !vm.multiselect) {
+            $scope.addTabindex();
+          }
+        }
       } else if (vm.restrictModel) {
         toDelete.push(item);
       }
@@ -508,14 +527,7 @@ function TreeChooserController(
    * Set the active element on search
    */
   vm.setActive = function () {
-    var active = vm.findActive();
-    if (active && active.isPresent()) {
-      // If currently active item is still present, don't do anything
-      return;
-    } else if (active) {
-      active.setActive(false);
-    }
-
+    vm.resetActive();
     var first;
     if (vm.onlyLeaves) {
       // Find first present leaf in flat items
@@ -537,6 +549,12 @@ function TreeChooserController(
   this.$onInit = function () {
     // Flag to determine whether search results are showing
     vm.shown = false;
+
+    // flag indicating that this is the initial load
+    vm.isInitialLoad = true;
+
+    // default .treeChooser tabindex value
+    vm.tabindex='-1';
 
     // Properties use to access special parts of item
     vm.properties = {
@@ -610,8 +628,10 @@ function TreeChooserController(
       vm.setExclusions(vm.items);
       if (_.size(vm.filterText) >= vm.filterAutoShowLength) {
         vm.showAll();
+        vm.setActive();
+      } else {
+        vm.reset();
       }
-      vm.setActive();
     });
 
     /**
