@@ -13,7 +13,7 @@
   <span class="treeChooser-label"
         ng-class="{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}"
         ng-click="vm.chooserVm.clearActive(); vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)">
-    {{vm.item.getLabel()}}
+    {{vm.item.getListLabel()}}
   </span>
 
   <!-- Recursion -->

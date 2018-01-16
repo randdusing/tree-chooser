@@ -9,6 +9,7 @@ function TreeChooserItemFactory () {
     this.properties = properties;
     this.id = _.get(this.item, this.properties.id);
     this.label = _.get(this.item, this.properties.label);
+    this.listLabel = _.get(this.item, this.properties.listLabel);
 
     this.parent = parent;
 
@@ -47,8 +48,8 @@ function TreeChooserItemFactory () {
     return this.id;
   };
 
-  TreeChooserItem.prototype.getLabel = function () {
-    return this.label;
+  TreeChooserItem.prototype.getListLabel = function () {
+    return this.listLabel;
   };
 
   TreeChooserItem.prototype.isActive = function () {
