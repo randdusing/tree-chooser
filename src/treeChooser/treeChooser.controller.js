@@ -560,6 +560,7 @@ function TreeChooserController(
     vm.properties = {
       id: vm.idProperty || 'id',
       label: vm.labelProperty || 'label',
+      listLabel: vm.listLabelProperty || vm.labelProperty || 'label',
       children: vm.childrenProperty || 'children'
     };
 
@@ -598,7 +599,8 @@ function TreeChooserController(
     // Default filter node function
     if (!_.isFunction(vm.filterNode)) {
       vm.filterNode = function (item, filterText) {
-        return _.includes(_.toLower(_.get(item, vm.properties.label)), _.toLower(filterText));
+        return _.includes(_.toLower(_.get(item, vm.properties.listLabel)), _.toLower(filterText)) ||
+          _.includes(_.toLower(_.get(item, vm.properties.label)), _.toLower(filterText));
       };
     }
     // Default disable node function

@@ -32,6 +32,12 @@ function TreeChooser($timeout) {
       labelProperty: '@',
 
       /**
+       * Property that contains list label
+       * @type {string}
+       */
+      listLabelProperty: '@',
+
+      /**
        * Property that contains children array
        * @type {string}
        */
