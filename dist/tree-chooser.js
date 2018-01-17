@@ -112,6 +112,12 @@ exports["tree-chooser"] =
 	      labelProperty: '@',
 	
 	      /**
+	       * Property that contains list label
+	       * @type {string}
+	       */
+	      listLabelProperty: '@',
+	
+	      /**
 	       * Property that contains children array
 	       * @type {string}
 	       */
@@ -837,6 +843,7 @@ exports["tree-chooser"] =
 	    vm.properties = {
 	      id: vm.idProperty || 'id',
 	      label: vm.labelProperty || 'label',
+	      listLabel: vm.listLabelProperty || vm.labelProperty || 'label',
 	      children: vm.childrenProperty || 'children'
 	    };
 	
@@ -875,7 +882,7 @@ exports["tree-chooser"] =
 	    // Default filter node function
 	    if (!_.isFunction(vm.filterNode)) {
 	      vm.filterNode = function (item, filterText) {
-	        return _.includes(_.toLower(_.get(item, vm.properties.label)), _.toLower(filterText));
+	        return _.includes(_.toLower(_.get(item, vm.properties.listLabel)), _.toLower(filterText)) || _.includes(_.toLower(_.get(item, vm.properties.label)), _.toLower(filterText));
 	      };
 	    }
 	    // Default disable node function
@@ -1011,7 +1018,7 @@ exports["tree-chooser"] =
 /* 13 */
 /***/ (function(module, exports) {
 
-	module.exports = "<span class=treeChooser-item ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";
+	module.exports = "<span class=treeChooser-item ng-class=\"{'treeChooser-selected': vm.item.isSelected(), 'treeChooser-active': vm.item.isActive()}\"> <span class=treeChooser-expansion ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.item.toggleExpanded()\"> <span ng-show=\"vm.item.hasAChildPresent() && vm.item.isExpanded()\" class=treeChooser-expanded>-</span> <span ng-show=\"vm.item.hasAChildPresent() && !vm.item.isExpanded()\" class=treeChooser-collapsed>+</span> </span> <span class=treeChooser-label ng-class=\"{'treeChooser-disabled': vm.chooserVm.disableNode(vm.item)}\" ng-click=\"vm.chooserVm.clearActive(); vm.item.setActive(true); vm.chooserVm.toggleSelected(vm.item)\"> {{vm.item.getListLabel()}} </span> <ul ng-if=vm.item.isExpanded()> <li ng-repeat=\"item in vm.item.getPresentChildren()\" tree-chooser-item=item></li> </ul> </span> ";
 
 /***/ }),
 /* 14 */
@@ -1046,6 +1053,7 @@ exports["tree-chooser"] =
 	    this.properties = properties;
 	    this.id = _.get(this.item, this.properties.id);
 	    this.label = _.get(this.item, this.properties.label);
+	    this.listLabel = _.get(this.item, this.properties.listLabel) || this.label;
 	
 	    this.parent = parent;
 	
@@ -1084,8 +1092,8 @@ exports["tree-chooser"] =
 	    return this.id;
 	  };
 	
-	  TreeChooserItem.prototype.getLabel = function () {
-	    return this.label;
+	  TreeChooserItem.prototype.getListLabel = function () {
+	    return this.listLabel;
 	  };
 	
 	  TreeChooserItem.prototype.isActive = function () {

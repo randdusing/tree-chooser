@@ -1,3 +1,6 @@
+## 0.0.17 - 2018-01-16
+- Separate property for list label
+
 ## 0.0.16 - 2017-12-15
 - Improved focusing for single select
 
